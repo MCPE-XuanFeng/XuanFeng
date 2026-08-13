@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="application_name" translatable="false">BlueLight-PMMP</string>
+	
+    <string name="activity_main" translatable="false">BlueLight-PMMP</string>
+    <string name="activity_console">Console</string>
+	
+    <string name="button_send">Send</string>
+    <string name="button_stop">Stop Server</string>
+    <string name="button_start">Start Server</string>
+    <string name="button_mount">Mount Java Library(ROOT)</string>
+
+    <string name="check_nukkit">Nukkit</string>
+    <string name="check_pocketmine">PocketMine</string>
+    <string name="check_ansi">Enable ANSI support</string>
+    <string name="check_kusud">Use ku.sud to request root</string>
+
+    <string name="message_copied">Copied.</string>
+    <string name="message_done">Done.</string>
+    <string name="message_running">is running</string>
+    <string name="message_tap_open">Tap to open Pocket Server</string>
+    <string name="message_installing">Installing,Please wait...</string>
+    <string name="message_downloading">Downloading %s ...</string>
+    <string name="message_install_fail">Install failed:</string>
+    <string name="message_install_success">Install successfully.</string>
+    <string name="message_install_fail_path">Install failed,please put "nukkit_library.tar.gz" to</string>
+    <string name="message_no_artifacts">No artifacts found.</string>
+    <string name="message_select_repository">Please select %s repository</string>
+    
+    <string name="label_management">Server Management</string>
+	<string name="label_type">Server Type</string>
+	<string name="label_console">Console Customize</string>
+	<string name="label_console_fontsize">Font Size:</string>
+	<string name="label_pocketMine_to">Put PocketMine-MP.phar or src folder to /storage/emulated/0/PocketMine</string>
+	<string name="label_nukkit_to">Put your Nukkit.jar to /storage/emulated/0/Nukkit</string>
+
+    <string name="bg_change">Change background</string>
+    <string name="bg_reset">Reset to default</string>
+    <string name="bg_set">Background updated</string>
+    <string name="bg_reset_done">Background reset to default</string>
+    <string name="storage_permission_title">All-files access required</string>
+    <string name="storage_permission_message">To use /storage/emulated/0/PocketMine, please allow "All files access" for BlueLight-PMMP in the next screen.</string>
+    <string name="storage_permission_denied">All-files access denied. Server data will fall back to the app-private directory.</string>
+	
+	<string name="menu_console">Console</string>
+    <string name="menu_kill">Kill server</string>
+    <string name="menu_clear">Clear</string>
+    <string name="menu_copy">Copy</string>
+    <string name="menu_install_php">Install PHP</string>
+    <string name="menu_install_php7">Download &amp; Install PHP7</string>
+    <string name="menu_install_java">Install Java</string>
+    <string name="menu_download">Download server</string>
+    <string name="unknown_host">Can\'t connect to Server</string>
+    <string name="menu_delete_server">Delete Server</string>
+    <string name="menu_backup_server">Backup Server</string>
+    <string name="menu_hp">BlueLight\'s HP</string>
+    <string name="menu_twitter" >Twitter(haniokasai)</string>
+    <string name="menu_bl_twitter">Twitter(BlueLight)</string>
+    <string name="menu_help">Help</string>
+    <string name="message_deleting">Deleting</string>
+    <string name="message_delete_success">Delete successfully</string>
+    <string name="message_delete_failed">Delete failed</string>
+    <string name="dialog_delete">Delete Server?</string>
+
+    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-/</string>
+    <string name="twitter_hani">https://twitter.com/haniokasai_en</string>
+    <string name="message_backup_fail">Backup failed</string>
+    <string name="message_backuping">Backuping...</string>
+    <string name="message_backup_success">Backup successfly!</string>
+
+    <!-- PHP installer (Material 3) -->
+    <string name="title_install_php">Install PHP</string>
+    <string name="php_install_select_version">PHP version</string>
+    <string name="php_install_select_source">Source</string>
+    <string name="php_source_pmmp">pmmp/PHP-Binaries (PHP 8.x, arm64)</string>
+    <string name="php_source_bundled">Bundled binary (PHP 7.x)</string>
+    <string name="php_source_custom">Custom URL (self-built)</string>
+    <string name="php_custom_url_hint">https://…/PHP-x.y-Android-arm64-PMx.tar.gz</string>
+    <string name="button_install">Install</string>
+    <string name="php_installing">Installing PHP %s …</string>
+    <string name="php_installed">PHP installed: %s</string>
+    <string name="php_install_failed">Failed to install PHP: %s</string>
+    <string name="php_unsupported_abi">Your device ABI (%s) is not arm64. pmmp PHP 8.x requires arm64. Use the bundled PHP 7.x binary instead.</string>
+    <string name="php_downloading">Downloading %s …</string>
+    <string name="php_extracting">Extracting PHP binaries…</string>
+    <string name="php_current">Current PHP: %s</string>
+    <string name="php_none">not installed</string>
+    <string name="php_bundled_arch_warning">The bundled PHP 7.x is an arm64 build and can only run on arm64 devices (this device: %1$s). A pmmp PHP 8.x build is recommended.</string>
+    <string name="php_incompatible">Installed but cannot run: architecture mismatch (binary %1$s, device %2$s). Install a matching PHP 8.x (arm64) via Install PHP.</string>
+    <string name="php_run_failed">Installed but failed to execute: %1$s</string>
+    <string name="php_open_installer">Open PHP installer</string>
+
+    <string name="php_source_local">Local file (device storage)</string>
+    <string name="php_choose_file">Choose PHP file…</string>
+    <string name="php_no_file">No file selected</string>
+    <string name="php_local_hint">Pick a php binary, or a .tar.gz archive that contains php.</string>
+
+    <!-- Settings (bilingual) -->
+    <string name="menu_settings">Settings</string>
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="lang_system">System</string>
+    <string name="lang_zh">中文</string>
+    <string name="lang_en">English</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_light">Light (White)</string>
+    <string name="theme_dark">Dark (Black)</string>
+    <string name="theme_custom">Custom</string>
+    <string name="settings_accent">Accent color</string>
+    <string name="accent_blue">Blue</string>
+    <string name="accent_green">Green</string>
+    <string name="accent_purple">Purple</string>
+    <string name="accent_amber">Amber</string>
+    <string name="accent_teal">Teal</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
+    <string name="settings_applied">Settings applied</string>
+
+    <string name="console_hint">Type a command and tap Send. Use /stop to shut down the server.</string>
+</resources>

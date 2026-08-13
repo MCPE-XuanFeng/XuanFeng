@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/menu_console"
+        android:icon="@drawable/hardware_dock"
+        android:title="@string/menu_console"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menu_install_php"
+        android:title="@string/menu_install_php"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/menu_download"
+        android:title="@string/menu_download"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_delete_server"
+        android:title="@string/menu_delete_server"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_backup_server"
+        android:title="@string/menu_backup_server"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_kill"
+        android:title="@string/menu_kill"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_hp"
+        android:title="@string/menu_hp"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_twitter"
+        android:title="@string/menu_twitter"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_bl_twitter"
+        android:title="@string/menu_bl_twitter"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_help"
+        android:title="@string/menu_help"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_settings"
+        android:title="@string/menu_settings"
+        app:showAsAction="never" />
+</menu>

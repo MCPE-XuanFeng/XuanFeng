@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="application_name" translatable="false">BlueLight-PMMP</string>
+
+    <string name="activity_main" translatable="false">BlueLight-PMMP</string>
+    <string name="activity_console">控制台</string>
+
+    <string name="button_send">发送</string>
+    <string name="button_stop">停止服务器</string>
+    <string name="button_start">启动服务器</string>
+    <string name="button_mount">挂载 Java 库(ROOT)</string>
+
+    <string name="check_nukkit">Nukkit</string>
+    <string name="check_pocketmine">PocketMine</string>
+    <string name="check_ansi">启用 ANSI 颜色支持</string>
+    <string name="check_kusud">使用 ku.sud 请求 root</string>
+
+    <string name="message_copied">已复制。</string>
+    <string name="message_done">完成。</string>
+    <string name="message_running">正在运行</string>
+    <string name="message_tap_open">点击打开服务器</string>
+    <string name="message_installing">正在安装，请稍候…</string>
+    <string name="message_downloading">正在下载 %s …</string>
+    <string name="message_install_fail">安装失败：</string>
+    <string name="message_install_success">安装成功。</string>
+    <string name="message_install_fail_path">安装失败，请把 \"nukkit_library.tar.gz\" 放到</string>
+    <string name="message_no_artifacts">未找到构建产物。</string>
+    <string name="message_select_repository">请选择 %s 仓库</string>
+
+    <string name="label_management">服务器管理</string>
+    <string name="label_type">服务器类型</string>
+    <string name="label_console">控制台设置</string>
+    <string name="label_console_fontsize">字体大小：</string>
+    <string name="label_pocketMine_to">将 PocketMine-MP.phar 或 src 文件夹放入 /storage/emulated/0/PocketMine</string>
+    <string name="label_nukkit_to">将 Nukkit.jar 放入 /storage/emulated/0/Nukkit</string>
+
+    <string name="bg_change">更换背景</string>
+    <string name="bg_reset">恢复默认</string>
+    <string name="bg_set">背景已更新</string>
+    <string name="bg_reset_done">已恢复默认背景</string>
+    <string name="storage_permission_title">需要所有文件访问权限</string>
+    <string name="storage_permission_message">要使用 /storage/emulated/0/PocketMine，请在下一屏为 BlueLight-PMMP 开启「所有文件访问权限」。</string>
+    <string name="storage_permission_denied">未授予所有文件访问权限。服务器数据将回退到应用私有目录。</string>
+
+    <string name="menu_console">控制台</string>
+    <string name="menu_kill">强制结束服务器</string>
+    <string name="menu_clear">清空</string>
+    <string name="menu_copy">复制</string>
+    <string name="menu_install_php">安装 PHP</string>
+    <string name="menu_install_php7">下载并安装 PHP7</string>
+    <string name="menu_install_java">安装 Java</string>
+    <string name="menu_download">下载服务器</string>
+    <string name="unknown_host">无法连接到服务器</string>
+    <string name="menu_delete_server">删除服务器</string>
+    <string name="menu_backup_server">备份服务器</string>
+    <string name="menu_hp">BlueLight 主页</string>
+    <string name="menu_twitter">Twitter(haniokasai)</string>
+    <string name="menu_bl_twitter">Twitter(BlueLight)</string>
+    <string name="menu_help">帮助</string>
+    <string name="message_deleting">正在删除</string>
+    <string name="message_delete_success">删除成功</string>
+    <string name="message_delete_failed">删除失败</string>
+    <string name="dialog_delete">删除服务器？</string>
+
+    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-/</string>
+    <string name="twitter_hani">https://twitter.com/haniokasai_en</string>
+    <string name="message_backup_fail">备份失败</string>
+    <string name="message_backuping">正在备份…</string>
+    <string name="message_backup_success">备份成功！</string>
+
+    <!-- PHP installer (Material 3) -->
+    <string name="title_install_php">安装 PHP</string>
+    <string name="php_install_select_version">PHP 版本</string>
+    <string name="php_install_select_source">来源</string>
+    <string name="php_source_pmmp">pmmp/PHP-Binaries（PHP 8.x，arm64）</string>
+    <string name="php_source_bundled">内置二进制（PHP 7.x）</string>
+    <string name="php_source_custom">自定义地址（自行构建）</string>
+    <string name="php_custom_url_hint">https://…/PHP-x.y-Android-arm64-PMx.tar.gz</string>
+    <string name="button_install">安装</string>
+    <string name="php_installing">正在安装 PHP %s …</string>
+    <string name="php_installed">PHP 已安装：%s</string>
+    <string name="php_install_failed">PHP 安装失败：%s</string>
+    <string name="php_unsupported_abi">你的设备 ABI（%s）不是 arm64。pmmp 的 PHP 8.x 需要 arm64，请改用内置的 PHP 7.x 二进制。</string>
+    <string name="php_downloading">正在下载 %s …</string>
+    <string name="php_extracting">正在解压 PHP 二进制…</string>
+    <string name="php_current">当前 PHP：%s</string>
+    <string name="php_none">未安装</string>
+    <string name="php_bundled_arch_warning">内置 PHP 7.x 为 arm64 构建，仅可在 arm64 设备上运行（本机：%1$s）。建议使用 pmmp 的 PHP 8.x 构建。</string>
+    <string name="php_incompatible">已安装但无法运行：架构不匹配（二进制 %1$s，设备 %2$s）。请通过「Install PHP」安装 PHP 8.x（arm64）。</string>
+    <string name="php_run_failed">已安装但执行失败：%1$s</string>
+    <string name="php_open_installer">打开 PHP 安装器</string>
+
+    <string name="php_source_local">本机文件（设备存储）</string>
+    <string name="php_choose_file">选择 PHP 文件…</string>
+    <string name="php_no_file">未选择文件</string>
+    <string name="php_local_hint">选择一个 php 可执行文件，或包含 php 的 .tar.gz 压缩包。</string>
+
+    <!-- Settings (bilingual) -->
+    <string name="menu_settings">设置</string>
+    <string name="settings_title">设置</string>
+    <string name="settings_language">语言</string>
+    <string name="lang_system">跟随系统</string>
+    <string name="lang_zh">中文</string>
+    <string name="lang_en">English</string>
+    <string name="settings_theme">主题</string>
+    <string name="theme_light">浅色（白）</string>
+    <string name="theme_dark">深色（黑）</string>
+    <string name="theme_custom">自定义</string>
+    <string name="settings_accent">强调色</string>
+    <string name="accent_blue">蓝色</string>
+    <string name="accent_green">绿色</string>
+    <string name="accent_purple">紫色</string>
+    <string name="accent_amber">琥珀色</string>
+    <string name="accent_teal">青色</string>
+    <string name="dialog_ok">确定</string>
+    <string name="dialog_cancel">取消</string>
+    <string name="settings_applied">设置已应用</string>
+
+    <string name="console_hint">输入命令后点“发送”。使用 /stop 关闭服务器。</string>
+</resources>

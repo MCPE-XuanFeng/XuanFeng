@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark scheme (Material 3) -->
+    <color name="primary">#A9C7FF</color>
+    <color name="on_primary">#003063</color>
+    <color name="primary_container">#00468F</color>
+    <color name="on_primary_container">#D6E2FF</color>
+    <color name="secondary">#B0CAD3</color>
+    <color name="on_secondary">#1B343C</color>
+    <color name="secondary_container">#334B53</color>
+    <color name="on_secondary_container">#CCE7F0</color>
+    <color name="tertiary">#C5C3FF</color>
+    <color name="on_tertiary">#2D2D52</color>
+    <color name="tertiary_container">#43436A</color>
+    <color name="on_tertiary_container">#E1DEFF</color>
+    <color name="background">#111318</color>
+    <color name="on_background">#E2E2E9</color>
+    <color name="surface">#111318</color>
+    <color name="on_surface">#E2E2E9</color>
+    <color name="surface_variant">#41474E</color>
+    <color name="on_surface_variant">#C1C7CF</color>
+    <color name="error">#FFB4AB</color>
+    <color name="on_error">#690005</color>
+    <color name="outline">#8B9199</color>
+
+    <!-- Frosted-glass (毛玻璃) surface tokens -->
+    <color name="glass_card">#80000000</color>        <!-- ~50% black -->
+    <color name="glass_toolbar">#66000000</color>     <!-- ~40% black -->
+    <color name="glass_console_bg">#99000000</color>  <!-- ~60% black -->
+    <color name="glass_stroke">#33FFFFFF</color>      <!-- 20% white edge highlight -->
+</resources>

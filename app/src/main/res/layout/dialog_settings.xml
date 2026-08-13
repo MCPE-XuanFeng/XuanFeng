@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/settings_language" />
+
+        <RadioGroup
+            android:id="@+id/rg_lang"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp">
+
+            <RadioButton
+                android:id="@+id/rb_lang_sys"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/lang_system" />
+
+            <RadioButton
+                android:id="@+id/rb_lang_zh"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/lang_zh" />
+
+            <RadioButton
+                android:id="@+id/rb_lang_en"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/lang_en" />
+        </RadioGroup>
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/settings_theme" />
+
+        <RadioGroup
+            android:id="@+id/rg_theme"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp">
+
+            <RadioButton
+                android:id="@+id/rb_theme_light"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/theme_light" />
+
+            <RadioButton
+                android:id="@+id/rb_theme_dark"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/theme_dark" />
+
+            <RadioButton
+                android:id="@+id/rb_theme_custom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/theme_custom" />
+        </RadioGroup>
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/settings_accent" />
+
+        <RadioGroup
+            android:id="@+id/rg_accent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp">
+
+            <RadioButton
+                android:id="@+id/rb_accent_blue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/accent_blue" />
+
+            <RadioButton
+                android:id="@+id/rb_accent_green"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/accent_green" />
+
+            <RadioButton
+                android:id="@+id/rb_accent_purple"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/accent_purple" />
+
+            <RadioButton
+                android:id="@+id/rb_accent_amber"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/accent_amber" />
+
+            <RadioButton
+                android:id="@+id/rb_accent_teal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/accent_teal" />
+        </RadioGroup>
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/bg_change" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_change_bg"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/bg_change" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/button_reset_bg"
+                style="@style/Widget.Material3.Button.OutlinedButton"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:text="@string/bg_reset" />
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>

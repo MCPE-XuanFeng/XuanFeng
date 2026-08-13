@@ -1,0 +1,48 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.haniokasai.app.pmmp_srv'
+    compileSdk 36
+    buildToolsVersion '36.0.0'
+
+    defaultConfig {
+        applicationId "com.haniokasai.app.pmmp_srv"
+        minSdk 21
+        // Deliberately 28 (Termux approach): Android 10+ SELinux W^X blocks
+        // exec() of app-data binaries for targetSdk >= 29, which would make
+        // downloaded/local PHP unusable. targetSdk 28 keeps that working and
+        // still installs & runs on Android 16.
+        targetSdk 28
+        versionCode 1074
+        versionName "1.0.7.4"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    lintOptions {
+        abortOnError false
+        checkReleaseBuilds false
+    }
+}
+
+dependencies {
+    implementation 'androidx.appcompat:appcompat:1.7.0'
+    implementation 'androidx.core:core:1.13.1'
+    implementation 'androidx.activity:activity:1.9.3'
+    implementation 'com.google.android.material:material:1.12.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'commons-io:commons-io:2.16.1'
+    implementation 'org.apache.commons:commons-compress:1.21'
+}

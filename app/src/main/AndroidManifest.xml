@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
+    <!-- Needed on Android 10 and below to write to the shared external storage root. -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="29" />
+
+    <!-- Android 11+ requires this to use /storage/emulated/0/PocketMine. -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
+        tools:ignore="ScopedStorage" />
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/application_name"
+        android:requestLegacyExternalStorage="true"
+        android:supportsRtl="true"
+        android:theme="@style/Theme.BlueLight"
+        tools:targetApi="34">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/activity_main">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".ConsoleActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:label="@string/activity_console" />
+
+        <activity
+            android:name=".InstallPhpActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:label="@string/title_install_php" />
+
+        <service
+            android:name=".ServerService"
+            android:exported="false"
+            android:foregroundServiceType="dataSync"
+            android:icon="@drawable/ic_launcher"
+            android:label="Server Service" />
+
+    </application>
+</manifest>

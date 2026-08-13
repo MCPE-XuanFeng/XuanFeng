@@ -1,0 +1,74 @@
+# Built application files
+*.apk
+*.aar
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+release/
+
+# Gradle files
+.gradle/
+build/
+app/build/
+captures/
+.externalNativeBuild/
+.cxx/
+
+# Gradle cache / task name cache
+.gradletasknamecache
+
+# Avoid ignoring Gradle wrapper jar (keep it in repo)
+!gradle-wrapper.jar
+
+# Local configuration file (sdk.dir, etc.) — machine specific
+local.properties
+
+# Log / temporary files
+*.log
+*.tmp
+tmp/
+
+# IntelliJ / Android Studio
+*.iml
+*.ipr
+*.iws
+.idea/
+misc.xml
+deploymentTargetDropDown.xml
+render.experimental.xml
+
+# Keystore / signing files — never commit secrets
+*.jks
+*.keystore
+*.p12
+*.pfx
+signing.properties
+
+# Android Studio / NDK
+local.properties
+ndk/
+*.cxx/
+cmake/
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# WorkBuddy local project data (machine specific)
+.workbuddy/
+
+# User-specific large binaries / downloaded artifacts
+*.tar.gz
+*.zip
+/downloads/

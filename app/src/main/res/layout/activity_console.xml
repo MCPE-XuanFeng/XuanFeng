@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Full-screen frosted backdrop (image + blur by RenderEffect in UiUtils) -->
+    <ImageView
+        android:id="@+id/glassBackdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/default_bg"
+        android:contentDescription="@null" />
+
+    <!-- Glass content layer -->
+    <LinearLayout
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/glass_toolbar"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:title="@string/activity_console"
+            app:titleTextColor="?attr/colorOnSurface" />
+
+        <!-- Two panes: log (left, fills) + command panel (right) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:orientation="horizontal"
+            android:padding="8dp">
+
+            <ScrollView
+                android:id="@+id/logScrollView"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="3"
+                android:padding="8dp">
+
+                <TextView
+                    android:id="@+id/label_log"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@color/glass_console_bg"
+                    android:padding="10dp"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textIsSelectable="true" />
+            </ScrollView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                app:cardBackgroundColor="@color/glass_card"
+                app:cardCornerRadius="18dp"
+                app:cardElevation="0dp"
+                app:contentPadding="12dp"
+                app:strokeColor="@color/glass_stroke"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="vertical">
+
+                    <TextView
+                        style="@style/TextAppearance.Material3.TitleSmall"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="@string/console_hint" />
+
+                    <com.google.android.material.textfield.TextInputLayout
+                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_marginTop="12dp"
+                        android:layout_weight="1"
+                        android:hint="@string/button_send">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:id="@+id/edit_command"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:gravity="top"
+                            android:imeOptions="actionSend"
+                            android:inputType="text" />
+                    </com.google.android.material.textfield.TextInputLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/button_send"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/button_send" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

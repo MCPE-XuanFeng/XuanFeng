@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Base soft gradient -->
+    <item>
+        <shape android:shape="rectangle">
+            <gradient
+                android:type="linear"
+                android:angle="135"
+                android:startColor="#5B8DEF"
+                android:centerColor="#9C6CF0"
+                android:endColor="#E26DC1" />
+        </shape>
+    </item>
+
+    <!-- Decorative color blobs (blurred by RenderEffect into a frosted look) -->
+    <item android:gravity="top|start">
+        <shape android:shape="oval">
+            <solid android:color="#59F0C8" />
+            <size android:width="360dp" android:height="360dp" />
+        </shape>
+    </item>
+
+    <item android:gravity="bottom|end">
+        <shape android:shape="oval">
+            <solid android:color="#FFC371" />
+            <size android:width="420dp" android:height="420dp" />
+        </shape>
+    </item>
+
+    <item android:gravity="center">
+        <shape android:shape="oval">
+            <solid android:color="#7FB2FF" />
+            <size android:width="280dp" android:height="280dp" />
+        </shape>
+    </item>
+
+    <item android:gravity="bottom|start">
+        <shape android:shape="oval">
+            <solid android:color="#FF9ECF" />
+            <size android:width="260dp" android:height="260dp" />
+        </shape>
+    </item>
+</layer-list>

@@ -1,0 +1,108 @@
+package com.haniokasai.app.pmmp_srv;
+
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.os.LocaleList;
+
+import androidx.appcompat.app.AppCompatDelegate;
+
+import java.util.Locale;
+
+/**
+ * Central place for user-facing preferences:
+ *  - Language  : "" (system) | "zh" | "en"
+ *  - Theme     : "light" | "dark" | "custom"
+ *  - Accent    : "blue" | "green" | "purple" | "amber" | "teal"  (used when theme == custom)
+ *
+ * Each Activity applies these in onCreate() (theme) and attachBaseContext() (locale).
+ */
+public final class AppSettings {
+
+    public static final String PREF = "config";
+    public static final String KEY_LANG = "lang";
+    public static final String KEY_THEME = "theme";
+    public static final String KEY_ACCENT = "accent";
+    public static final String KEY_BG_IMAGE = "bg_image_uri";
+
+    private AppSettings() {
+    }
+
+    public static SharedPreferences prefs(Context c) {
+        return c.getSharedPreferences(PREF, Context.MODE_PRIVATE);
+    }
+
+    public static String lang(Context c) {
+        return prefs(c).getString(KEY_LANG, "");
+    }
+
+    public static String theme(Context c) {
+        return prefs(c).getString(KEY_THEME, "light");
+    }
+
+    public static String accent(Context c) {
+        return prefs(c).getString(KEY_ACCENT, "blue");
+    }
+
+    /** Custom background image URI; empty means use the built-in default. */
+    public static String backgroundUri(Context c) {
+        return prefs(c).getString(KEY_BG_IMAGE, "");
+    }
+
+    public static void setBackgroundUri(Context c, String uri) {
+        prefs(c).edit().putString(KEY_BG_IMAGE, uri).apply();
+    }
+
+    public static void clearBackgroundUri(Context c) {
+        prefs(c).edit().remove(KEY_BG_IMAGE).apply();
+    }
+
+    /** Night mode to force for the current theme preference. */
+    public static int nightMode(Context c) {
+        switch (theme(c)) {
+            case "dark":
+                return AppCompatDelegate.MODE_NIGHT_YES;
+            case "light":
+                return AppCompatDelegate.MODE_NIGHT_NO;
+            default: // custom follows the system
+                return AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+        }
+    }
+
+    /** Theme resource id to apply in onCreate(), before setContentView. */
+    public static int themeRes(Context c) {
+        if (!"custom".equals(theme(c))) {
+            return R.style.Theme_BlueLight;
+        }
+        switch (accent(c)) {
+            case "green":
+                return R.style.Theme_BlueLight_Custom_Green;
+            case "purple":
+                return R.style.Theme_BlueLight_Custom_Purple;
+            case "amber":
+                return R.style.Theme_BlueLight_Custom_Amber;
+            case "teal":
+                return R.style.Theme_BlueLight_Custom_Teal;
+            default:
+                return R.style.Theme_BlueLight_Custom_Blue;
+        }
+    }
+
+    /** Wraps a base context so that resources resolve in the chosen language. */
+    public static Context wrap(Context base) {
+        String l = lang(base);
+        if (l == null || l.isEmpty()) {
+            return base;
+        }
+        Locale locale = "zh".equals(l) ? Locale.SIMPLIFIED_CHINESE : Locale.ENGLISH;
+        Locale.setDefault(locale);
+        Configuration config = new Configuration(base.getResources().getConfiguration());
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+            config.setLocales(new LocaleList(locale));
+        } else {
+            config.locale = locale;
+        }
+        return base.createConfigurationContext(config);
+    }
+}

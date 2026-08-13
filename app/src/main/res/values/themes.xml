@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- Base Material 3 DayNight theme for BlueLight-PMMP.
+         Picks light palette (values/colors.xml) or dark palette (values-night/colors.xml)
+         depending on the night mode chosen in AppSettings. -->
+    <style name="Theme.BlueLight" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorOnPrimary">@color/on_primary</item>
+        <item name="colorPrimaryContainer">@color/primary_container</item>
+        <item name="colorOnPrimaryContainer">@color/on_primary_container</item>
+        <item name="colorSecondary">@color/secondary</item>
+        <item name="colorOnSecondary">@color/on_secondary</item>
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
+        <item name="colorOnSecondaryContainer">@color/on_secondary_container</item>
+        <item name="colorTertiary">@color/tertiary</item>
+        <item name="colorOnTertiary">@color/on_tertiary</item>
+        <item name="colorTertiaryContainer">@color/tertiary_container</item>
+        <item name="colorOnTertiaryContainer">@color/on_tertiary_container</item>
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/on_surface</item>
+        <item name="colorSurfaceVariant">@color/surface_variant</item>
+        <item name="colorOnSurfaceVariant">@color/on_surface_variant</item>
+        <item name="colorError">@color/error</item>
+        <item name="colorOnError">@color/on_error</item>
+        <item name="colorOutline">@color/outline</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <!-- Splash / launcher theme alias -->
+    <style name="Theme.BlueLight.Launcher" parent="Theme.BlueLight">
+        <item name="android:windowBackground">@color/surface</item>
+    </style>
+
+    <!-- ============================================================= -->
+    <!-- Custom accent themes (used when theme preference == "custom") -->
+    <!-- They inherit the DayNight neutral palette (background/surface) -->
+    <!-- and only override the accent colors.                          -->
+    <!-- ============================================================= -->
+
+    <style name="Theme.BlueLight.Custom" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="Theme.BlueLight.Custom.Blue" parent="Theme.BlueLight.Custom">
+        <item name="colorPrimary">#2862C9</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#C7DBFF</item>
+        <item name="colorOnPrimaryContainer">#001B3C</item>
+        <item name="colorSecondary">#4A6572</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#CDE4EC</item>
+        <item name="colorOnSecondaryContainer">#051F27</item>
+        <item name="colorTertiary">#5B5B92</item>
+        <item name="colorOnTertiary">#FFFFFF</item>
+        <item name="colorTertiaryContainer">#E1DEFF</item>
+        <item name="colorOnTertiaryContainer">#171734</item>
+        <item name="colorOutline">#71787F</item>
+    </style>
+
+    <style name="Theme.BlueLight.Custom.Green" parent="Theme.BlueLight.Custom">
+        <item name="colorPrimary">#2E7D32</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#B6F09C</item>
+        <item name="colorOnPrimaryContainer">#00210A</item>
+        <item name="colorSecondary">#4F6351</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#D2E8D6</item>
+        <item name="colorOnSecondaryContainer">#0C1F13</item>
+        <item name="colorTertiary">#386A64</item>
+        <item name="colorOnTertiary">#FFFFFF</item>
+        <item name="colorTertiaryContainer">#BCEDEC</item>
+        <item name="colorOnTertiaryContainer">#00201D</item>
+        <item name="colorOutline">#72787A</item>
+    </style>
+
+    <style name="Theme.BlueLight.Custom.Purple" parent="Theme.BlueLight.Custom">
+        <item name="colorPrimary">#6750A4</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#EADDFF</item>
+        <item name="colorOnPrimaryContainer">#21005D</item>
+        <item name="colorSecondary">#625B71</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#E8DEF8</item>
+        <item name="colorOnSecondaryContainer">#1D192B</item>
+        <item name="colorTertiary">#7D5260</item>
+        <item name="colorOnTertiary">#FFFFFF</item>
+        <item name="colorTertiaryContainer">#FFD8E4</item>
+        <item name="colorOnTertiaryContainer">#31111D</item>
+        <item name="colorOutline">#79747E</item>
+    </style>
+
+    <style name="Theme.BlueLight.Custom.Amber" parent="Theme.BlueLight.Custom">
+        <item name="colorPrimary">#C77800</item>
+        <item name="colorOnPrimary">#000000</item>
+        <item name="colorPrimaryContainer">#FFDCAB</item>
+        <item name="colorOnPrimaryContainer">#3A1E00</item>
+        <item name="colorSecondary">#6E5A4B</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#F8DFD0</item>
+        <item name="colorOnSecondaryContainer">#28180F</item>
+        <item name="colorTertiary">#6F5C2E</item>
+        <item name="colorOnTertiary">#FFFFFF</item>
+        <item name="colorTertiaryContainer">#F7E1A8</item>
+        <item name="colorOnTertiaryContainer">#231B00</item>
+        <item name="colorOutline">#7C736A</item>
+    </style>
+
+    <style name="Theme.BlueLight.Custom.Teal" parent="Theme.BlueLight.Custom">
+        <item name="colorPrimary">#00695C</item>
+        <item name="colorOnPrimary">#FFFFFF</item>
+        <item name="colorPrimaryContainer">#6FF0DC</item>
+        <item name="colorOnPrimaryContainer">#002019</item>
+        <item name="colorSecondary">#4A6360</item>
+        <item name="colorOnSecondary">#FFFFFF</item>
+        <item name="colorSecondaryContainer">#CDE8E4</item>
+        <item name="colorOnSecondaryContainer">#051F1C</item>
+        <item name="colorTertiary">#4A6079</item>
+        <item name="colorOnTertiary">#FFFFFF</item>
+        <item name="colorTertiaryContainer">#D2E4FF</item>
+        <item name="colorOnTertiaryContainer">#031E36</item>
+        <item name="colorOutline">#6E7776</item>
+    </style>
+</resources>

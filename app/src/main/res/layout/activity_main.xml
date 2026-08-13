@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Full-screen frosted backdrop (image + blur by RenderEffect in UiUtils) -->
+    <ImageView
+        android:id="@+id/glassBackdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/default_bg"
+        android:contentDescription="@null" />
+
+    <!-- Glass content layer -->
+    <LinearLayout
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/glass_toolbar"
+            app:titleTextColor="?attr/colorOnSurface"
+            app:title="@string/application_name" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <!-- Two columns side by side — fills the wide landscape area. -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <!-- Left column: server management -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/glass_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:contentPadding="16dp"
+                    app:strokeColor="@color/glass_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TextAppearance.Material3.TitleMedium"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/label_management" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/button_start"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/button_start" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/button_stop"
+                            style="@style/Widget.Material3.Button.OutlinedButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/button_stop" />
+
+                        <com.google.android.material.checkbox.MaterialCheckBox
+                            android:id="@+id/check_ansi"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="8dp"
+                            android:text="@string/check_ansi" />
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/label_console_fontsize" />
+
+                        <com.google.android.material.slider.Slider
+                            android:id="@+id/seekbar_fontsize"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:stepSize="1"
+                            android:value="16"
+                            android:valueFrom="8"
+                            android:valueTo="40" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+
+                <!-- Right column: PHP status -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/glass_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:contentPadding="16dp"
+                    app:strokeColor="@color/glass_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TextAppearance.Material3.TitleMedium"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/title_install_php" />
+
+                        <TextView
+                            android:id="@+id/text_php_status"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:text="@string/php_none" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/button_open_installer"
+                            style="@style/Widget.Material3.Button.TonalButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="@string/php_open_installer" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </ScrollView>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:padding="12dp"
+            android:text="@string/label_pocketMine_to" />
+    </LinearLayout>
+</FrameLayout>

@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Full-screen frosted backdrop (image + blur by RenderEffect in UiUtils) -->
+    <ImageView
+        android:id="@+id/glassBackdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:src="@drawable/default_bg"
+        android:contentDescription="@null" />
+
+    <!-- Glass content layer -->
+    <LinearLayout
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/glass_toolbar"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:title="@string/title_install_php"
+            app:titleTextColor="?attr/colorOnSurface" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1">
+
+            <!-- Two columns: selection on the left, install actions on the right -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="16dp">
+
+                <!-- Left column: status + selection -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        app:cardBackgroundColor="@color/glass_card"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="0dp"
+                        app:contentPadding="16dp"
+                        app:strokeColor="@color/glass_stroke"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TextAppearance.Material3.TitleMedium"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/php_current" />
+
+                            <TextView
+                                android:id="@+id/text_php_status"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:text="@string/php_none" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        app:cardBackgroundColor="@color/glass_card"
+                        app:cardCornerRadius="20dp"
+                        app:cardElevation="0dp"
+                        app:contentPadding="16dp"
+                        app:strokeColor="@color/glass_stroke"
+                        app:strokeWidth="1dp">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/TextAppearance.Material3.LabelMedium"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="@string/php_install_select_source" />
+
+                            <Spinner
+                                android:id="@+id/spinner_source"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp" />
+
+                            <TextView
+                                style="@style/TextAppearance.Material3.LabelMedium"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="12dp"
+                                android:text="@string/php_install_select_version" />
+
+                            <Spinner
+                                android:id="@+id/spinner_version"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp" />
+
+                            <com.google.android.material.textfield.TextInputLayout
+                                style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="12dp"
+                                android:hint="@string/php_custom_url_hint">
+
+                                <com.google.android.material.textfield.TextInputEditText
+                                    android:id="@+id/edit_custom_url"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:inputType="textUri" />
+                            </com.google.android.material.textfield.TextInputLayout>
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/button_choose_file"
+                                style="@style/Widget.Material3.Button.TonalButton"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="12dp"
+                                android:text="@string/php_choose_file"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/text_local_hint"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/php_local_hint"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/text_local_file"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="4dp"
+                                android:ellipsize="middle"
+                                android:singleLine="true"
+                                android:text="@string/php_no_file"
+                                android:visibility="gone" />
+
+                            <TextView
+                                android:id="@+id/text_abi_warning"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="8dp"
+                                android:text="@string/php_unsupported_abi"
+                                android:textColor="?attr/colorError"
+                                android:visibility="gone" />
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
+                </LinearLayout>
+
+                <!-- Right column: progress + status + install -->
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    app:cardBackgroundColor="@color/glass_card"
+                    app:cardCornerRadius="20dp"
+                    app:cardElevation="0dp"
+                    app:contentPadding="16dp"
+                    app:strokeColor="@color/glass_stroke"
+                    app:strokeWidth="1dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/TextAppearance.Material3.TitleMedium"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/button_install" />
+
+                        <com.google.android.material.progressindicator.LinearProgressIndicator
+                            android:id="@+id/progress"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:indeterminate="true"
+                            android:visibility="gone" />
+
+                        <TextView
+                            android:id="@+id/text_status"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:visibility="gone" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/button_install"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="16dp"
+                            android:text="@string/button_install" />
+                    </LinearLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</FrameLayout>
