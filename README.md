@@ -1,8 +1,8 @@
-# ****占位****
+# XuanFeng
 
 > 在您的 Android 手机上运行 **PocketMine-MP**（Minecraft Bedrock 版）服务器。
 
- ****占位**** 是一款 Material Design 3 Android 应用，让您可以在设备上安装 PHP 运行环境、部署 PocketMine-MP 服务器，并通过内置控制台进行管理 —— 一切尽在掌中。
+ XuanFeng 是一款 Material Design 3 Android 应用，让您可以在设备上安装 PHP 运行环境、部署 PocketMine-MP 服务器，并通过内置控制台进行管理 —— 一切尽在掌中。
 
 ---
 
@@ -35,7 +35,7 @@
 | Android Gradle Plugin | 8.11.1 |
 | Android SDK | platform-36，build-tools 36.x |
 
-> ⚠️ 内置的 PHP 7.x 是 32 位版本。在 arm64 设备上可能无法启动 —— 请改用 **PHP 8.x（arm64）**。
+> ⚠️ 内置的 PHP 7.x 是 arm64 构建。在 arm64 设备上可直接运行，但功能较旧，建议改用 **PHP 8.x（arm64）**。
 
 ---
 

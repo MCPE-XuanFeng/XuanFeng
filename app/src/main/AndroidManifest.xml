@@ -17,7 +17,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/application_name"
         android:requestLegacyExternalStorage="true"
         android:supportsRtl="true"
@@ -53,7 +53,7 @@
             android:name=".ServerService"
             android:exported="false"
             android:foregroundServiceType="dataSync"
-            android:icon="@drawable/ic_launcher"
+            android:icon="@mipmap/ic_launcher"
             android:label="Server Service" />
 
     </application>

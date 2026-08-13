@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="application_name" translatable="false">XuanFeng</string>
+    <string name="activity_main" translatable="false">XuanFeng</string>
+
     <string name="menu_kill">サーバーを強制終了する</string>
     <string name="activity_console">端末</string>
     <string name="button_mount">Javaライブラリをマウント(root化必須)</string>
@@ -37,9 +40,9 @@
     <string name="unknown_host">サーバーに接続できませんでした</string>
     <string name="menu_delete_server">サーバーを削除する</string>
     <string name="menu_backup_server">サーバーをバックアップする</string>
-    <string name="menu_hp">BlueLightのホームページ</string>
+    <string name="menu_hp">XuanFengのホームページ</string>
     <string name="menu_twitter">Twitter(haniokasai)</string>
-    <string name="menu_bl_twitter">Twitter(BlueLight)</string>
+    <string name="menu_bl_twitter">Twitter(XuanFeng)</string>
     <string name="menu_help">ヘルプ</string>
     <string name="message_deleting">削除中...</string>
     <string name="message_delete_success">削除完了</string>

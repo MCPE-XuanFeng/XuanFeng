@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="application_name" translatable="false">BlueLight-PMMP</string>
+    <string name="application_name" translatable="false">XuanFeng</string>
 	
-    <string name="activity_main" translatable="false">BlueLight-PMMP</string>
+    <string name="activity_main" translatable="false">XuanFeng</string>
     <string name="activity_console">Console</string>
 	
     <string name="button_send">Send</string>
@@ -39,7 +39,7 @@
     <string name="bg_set">Background updated</string>
     <string name="bg_reset_done">Background reset to default</string>
     <string name="storage_permission_title">All-files access required</string>
-    <string name="storage_permission_message">To use /storage/emulated/0/PocketMine, please allow "All files access" for BlueLight-PMMP in the next screen.</string>
+    <string name="storage_permission_message">To use /storage/emulated/0/PocketMine, please allow "All files access" for XuanFeng in the next screen.</string>
     <string name="storage_permission_denied">All-files access denied. Server data will fall back to the app-private directory.</string>
 	
 	<string name="menu_console">Console</string>
@@ -53,9 +53,9 @@
     <string name="unknown_host">Can\'t connect to Server</string>
     <string name="menu_delete_server">Delete Server</string>
     <string name="menu_backup_server">Backup Server</string>
-    <string name="menu_hp">BlueLight\'s HP</string>
+    <string name="menu_hp">XuanFeng Home</string>
     <string name="menu_twitter" >Twitter(haniokasai)</string>
-    <string name="menu_bl_twitter">Twitter(BlueLight)</string>
+    <string name="menu_bl_twitter">Twitter(XuanFeng)</string>
     <string name="menu_help">Help</string>
     <string name="message_deleting">Deleting</string>
     <string name="message_delete_success">Delete successfully</string>
