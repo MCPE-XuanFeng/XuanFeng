@@ -2,6 +2,14 @@
 chcp 65001 >nul
 setlocal EnableDelayedExpansion
 
+:: ============================================================
+:: Proxy settings (for users behind a local proxy like Clash)
+:: Set USE_PROXY=1 to route git pull/push through the proxy.
+:: Change PROXY_ADDR if your proxy is on a different host/port.
+:: ============================================================
+set "USE_PROXY=1"
+set "PROXY_ADDR=http://127.0.0.1:7897"
+
 :: Switch to the folder this script lives in (project root),
 :: so it works no matter where you double-click it from.
 cd /d "%~dp0"
@@ -29,6 +37,13 @@ git remote get-url %REMOTE% >nul 2>&1
 if errorlevel 1 (
     echo [ERROR] Remote "%REMOTE%" not found. Configure git remote first.
     goto :end
+)
+
+:: Build the -c proxy flags (empty when proxy is disabled)
+set "PROXY_FLAGS="
+if "%USE_PROXY%"=="1" (
+    set "PROXY_FLAGS=-c http.proxy=%PROXY_ADDR% -c https.proxy=%PROXY_ADDR%"
+    echo Using proxy: %PROXY_ADDR%
 )
 
 :: 4. Stage everything
@@ -61,15 +76,16 @@ if errorlevel 1 (
 :sync
 :: 6. Sync with remote (rebase) then push
 echo [3/3] Syncing with %REMOTE%/%BRANCH% and pushing ...
-git pull --rebase %REMOTE% %BRANCH% 2>&1
+git %PROXY_FLAGS% pull --rebase %REMOTE% %BRANCH% 2>&1
 if errorlevel 1 (
-    echo [WARN] Pull/rebase failed (possible conflict). Aborting rebase.
+    echo [WARN] Pull/rebase failed - possible conflict or no network. Aborting rebase.
     git rebase --abort >nul 2>&1
     goto :end
 )
-git push %REMOTE% %BRANCH% 2>&1
+git %PROXY_FLAGS% push %REMOTE% %BRANCH% 2>&1
 if errorlevel 1 (
-    echo [ERROR] Push failed. Check network or credentials (token / SSH key).
+    echo [ERROR] Push failed. Check network, SSL, proxy or credentials.
+    echo [ERROR] If proxy is wrong, set USE_PROXY=0 at the top of this file.
     goto :end
 )
 
