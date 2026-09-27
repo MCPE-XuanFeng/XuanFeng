@@ -58,9 +58,19 @@ public final class ServerUtils {
         return dir.getPath();
     }
 
-    /** Legacy storage (targetSdk<30): WRITE_EXTERNAL_STORAGE grants /storage/emulated/0 access. */
+    /**
+     * Whether the app can read/write the shared external-storage root
+     * (/storage/emulated/0/PocketMine).
+     * - API < 23: always allowed.
+     * - API 23..29: WRITE_EXTERNAL_STORAGE (legacy storage, targetSdk 28).
+     * - API >= 30: WRITE_EXTERNAL_STORAGE is scoped and cannot reach an
+     *   arbitrary /PocketMine folder, so MANAGE_EXTERNAL_STORAGE is required.
+     */
     private static boolean canWriteSharedStorage() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
+        if (Build.VERSION.SDK_INT >= 30) {
+            return Environment.isExternalStorageManager();
+        }
         return mContext.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == android.content.pm.PackageManager.PERMISSION_GRANTED;
     }
@@ -93,16 +103,26 @@ public final class ServerUtils {
         }
     }
 
-    public static Boolean isRunning() {
+    public static boolean isRunning() {
+        if (serverProcess == null) return false;
         try {
             serverProcess.exitValue();
-        } catch (Exception e) {
-            return true;
+            return false; // exitValue() succeeded => the process has exited
+        } catch (IllegalThreadStateException e) {
+            return true; // exitValue() threw => the process is still alive
         }
-        return false;
     }
 
     final public static void runServer() {
+        // Guard against double-start. If a server is already alive we must not
+        // spawn a second process, otherwise the first one is orphaned and
+        // stdin ends up pointing at the wrong (dying) process, which makes the
+        // console appear to accept commands that never reach the server.
+        // stopNotifyService()/killServer() reset the process handle.
+        if (isRunning()) {
+            ConsoleActivity.log("[PE Server] Server is already running; ignoring duplicate start request.");
+            return;
+        }
         File f = new File(getDataDirectory(), "/tmp");
         if (!f.exists()) {
             f.mkdir();
@@ -262,11 +282,19 @@ public final class ServerUtils {
     }
 
     public static void writeCommand(String Cmd) {
+        if (serverProcess == null || stdin == null) {
+            ConsoleActivity.log("[Console] Cannot send command: server is not running. Start the server first.");
+            return;
+        }
+        if (!isRunning()) {
+            ConsoleActivity.log("[Console] Cannot send command: server process has already exited. Check the log for a crash.");
+            return;
+        }
         try {
             stdin.write((Cmd + "\r\n").getBytes());
             stdin.flush();
         } catch (Exception e) {
-            // ignore
+            ConsoleActivity.log("[Console] Failed to send command to server: " + e.getMessage());
         }
     }
 

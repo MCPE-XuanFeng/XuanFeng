@@ -155,7 +155,9 @@ public class MainActivity extends AppCompatActivity {
             refreshEnabled();
             serverIntent = new Intent(instance, ServerService.class);
             startService(serverIntent);
-            ServerUtils.runServer();
+            // Spawn the PHP process on a worker thread: process start plus PHP
+            // preparation can be slow and must not block the UI thread (ANR).
+            new Thread(ServerUtils::runServer).start();
         });
         button_stop.setOnClickListener(v -> {
             if (ServerUtils.isRunning()) {
@@ -544,11 +546,37 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * targetSdk is 28 (Termux approach), so the app uses legacy storage:
-     * WRITE_EXTERNAL_STORAGE alone grants access to /storage/emulated/0.
-     * Ask the user once at launch (API 23+).
+     * Ensure the app can write to /storage/emulated/0/PocketMine.
+     *
+     * - API >= 30: WRITE_EXTERNAL_STORAGE is scoped and can never reach an
+     *   arbitrary /PocketMine folder, so MANAGE_EXTERNAL_STORAGE (All files
+     *   access) is required. Open the system settings page for this package.
+     *   Without this check the old code requested WRITE_EXTERNAL_STORAGE on
+     *   every launch, which the OS never grants above API 29 — hence the
+     *   "repeatedly asks for permission" loop.
+     * - API 23..29: request WRITE_EXTERNAL_STORAGE at runtime (legacy storage).
      */
     private void ensureAllFilesAccess() {
+        if (Build.VERSION.SDK_INT >= 30) {
+            if (!Environment.isExternalStorageManager()) {
+                new AlertDialog.Builder(this)
+                        .setTitle(R.string.storage_permission_title)
+                        .setMessage(R.string.storage_permission_message)
+                        .setPositiveButton(R.string.dialog_ok, (d, w) -> {
+                            Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+                            intent.setData(Uri.parse("package:" + getPackageName()));
+                            try {
+                                startActivity(intent);
+                            } catch (Exception e) {
+                                toast(R.string.storage_permission_denied);
+                            }
+                        })
+                        .setNegativeButton(R.string.dialog_cancel, (d, w) ->
+                                toast(R.string.storage_permission_denied))
+                        .show();
+            }
+            return;
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != android.content.pm.PackageManager.PERMISSION_GRANTED) {
