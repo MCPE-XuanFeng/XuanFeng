@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------
+# Line-ending policy for this repository.
+#
+# WHY: this project is developed on Windows with core.autocrlf=true,
+# so without these rules every text file is STORED with CRLF. That is
+# harmless for Java/Gradle/Groovy/YAML but fatal for the POSIX shell
+# script "gradlew": on Linux CI the shebang becomes "#!/bin/sh\r" and
+# the build dies with
+#     ./gradlew: /bin/sh^M: bad interpreter: No such file or directory
+#
+# Keep LF in the repository for text, except Windows helpers which
+# stay CRLF on disk.
+# ---------------------------------------------------------------
+
+* text=auto
+
+# POSIX shell scripts: LF in the repo AND in the working tree
+gradlew   text eol=lf
+*.sh      text eol=lf
+
+# Windows helpers: keep CRLF in the working tree
+*.bat     text eol=crlf
+*.cmd     text eol=crlf
+
+# Binaries - never convert, never diff
+*.jar     binary
+*.apk     binary
+*.aab     binary
+*.dex     binary
+*.so      binary
+*.phar    binary
+*.zip     binary
+*.tga     binary
+*.fsb     binary
+*.png     binary
+*.jpg     binary
+*.jpeg    binary
+*.gif     binary
+*.webp    binary
+*.ttf     binary
+*.otf     binary
