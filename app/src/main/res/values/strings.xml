@@ -115,6 +115,10 @@
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="settings_applied">Settings applied</string>
+    <string name="settings_console_title">Console</string>
+    <string name="settings_pty_console">PTY console mode</string>
+    <string name="settings_pty_console_hint">Runs the server through a pseudo-terminal so typed commands actually reach it. Turn this off to launch it the plain way instead.</string>
+    <string name="settings_pty_changed">PTY console mode takes effect the next time the server starts.</string>
 
     <string name="console_hint">Type a command and tap Send. Use /stop to shut down the server.</string>
 </resources>

@@ -517,6 +517,35 @@ public class PhpManager {
         return null;
     }
 
+    /** Path of the bundled busybox once extracted into the app data dir. */
+    public static File getBusyboxPath(Context context) {
+        return new File(context.getApplicationInfo().dataDir, "busybox");
+    }
+
+    /**
+     * Extracts the bundled busybox into the app data dir and makes it executable.
+     *
+     * Only used by the PTY console mode: {@code busybox script} is what hands the
+     * server process a real terminal, which MengFang's CommandReader requires
+     * before it will read stdin (see AppSettings#ptyConsole).
+     *
+     * @return the executable, or null when it could not be installed.
+     */
+    public static File ensureBusybox(Context context) {
+        File dst = getBusyboxPath(context);
+        try {
+            if (!dst.exists() || dst.length() == 0) {
+                copyAsset(context, "busybox", dst);
+            }
+            if (!makeExecutable(dst)) {
+                return null;
+            }
+            return dst;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     private static void copyFile(File src, File dst) throws Exception {
         try (InputStream in = new java.io.FileInputStream(src);
              OutputStream out = new FileOutputStream(dst)) {

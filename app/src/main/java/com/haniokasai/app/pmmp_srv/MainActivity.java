@@ -503,6 +503,9 @@ public class MainActivity extends AppCompatActivity {
                 break;
         }
 
+        MaterialCheckBox checkPty = view.findViewById(R.id.check_pty_console);
+        checkPty.setChecked(AppSettings.ptyConsole(this));
+
         view.findViewById(R.id.button_change_bg).setOnClickListener(v -> {
             bgLauncher.launch(new String[]{"image/*"});
         });
@@ -535,7 +538,17 @@ public class MainActivity extends AppCompatActivity {
             ed.putString(AppSettings.KEY_THEME, newTheme);
             ed.putString(AppSettings.KEY_ACCENT, newAccent);
             ed.apply();
+
+            boolean newPty = checkPty.isChecked();
+            boolean ptyChanged = newPty != AppSettings.ptyConsole(this);
+            if (ptyChanged) {
+                AppSettings.setPtyConsole(this, newPty);
+            }
+
             toast(getString(R.string.settings_applied));
+            if (ptyChanged) {
+                toast(getString(R.string.settings_pty_changed));
+            }
             recreate();
         });
         builder.setNegativeButton(R.string.dialog_cancel, (d, w) -> d.dismiss());

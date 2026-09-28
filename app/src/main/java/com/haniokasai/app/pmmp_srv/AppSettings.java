@@ -25,6 +25,7 @@ public final class AppSettings {
     public static final String KEY_THEME = "theme";
     public static final String KEY_ACCENT = "accent";
     public static final String KEY_BG_IMAGE = "bg_image_uri";
+    public static final String KEY_PTY_CONSOLE = "pty_console";
 
     private AppSettings() {
     }
@@ -56,6 +57,22 @@ public final class AppSettings {
 
     public static void clearBackgroundUri(Context c) {
         prefs(c).edit().remove(KEY_BG_IMAGE).apply();
+    }
+
+    /**
+     * Launch the server through "busybox script" so PHP gets a real PTY.
+     *
+     * Android's ProcessBuilder hands the child a pipe, never a terminal, and
+     * MengFang's CommandReader only starts reading stdin when stream_isatty()
+     * is true - so with a plain pipe the console silently swallows every
+     * command. Default on; turn it off to go back to the plain pipe launch.
+     */
+    public static boolean ptyConsole(Context c) {
+        return prefs(c).getBoolean(KEY_PTY_CONSOLE, true);
+    }
+
+    public static void setPtyConsole(Context c, boolean enabled) {
+        prefs(c).edit().putBoolean(KEY_PTY_CONSOLE, enabled).apply();
     }
 
     /** Night mode to force for the current theme preference. */

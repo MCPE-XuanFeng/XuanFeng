@@ -121,6 +121,28 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:text="@string/settings_console_title" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/check_pty_console"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:text="@string/settings_pty_console" />
+
+        <TextView
+            style="@style/TextAppearance.Material3.BodySmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/settings_pty_console_hint" />
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="@string/bg_change" />
 
         <LinearLayout

@@ -17,7 +17,9 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -163,13 +165,55 @@ public final class ServerUtils {
                 // ignore
             }
         }
-        String[] args = new String[]{
-                execPath,
-                "-c",
-                getDataDirectory() + "/php.ini",
-                getDataDirectory() + file,
-                MainActivity.ansiMode ? "--enable-ansi" : "--disable-ansi"
-        };
+        // ---- command line --------------------------------------------------
+        // Android hands the child process a PIPE, never a terminal, and
+        // MengFang's CommandReader only starts reading stdin when
+        // stream_isatty() is true - so over a plain pipe the console silently
+        // swallows every command. Wrapping the launch in "busybox script"
+        // gives PHP a real PTY and the console works again.
+        //   * --disable-readline stops readline from installing its own
+        //     "Genisys> " prompt, which would pollute this app's console view.
+        //   * stty -echo keeps the PTY from echoing our own writes back at us,
+        //     and -onlcr avoids doubling every newline.
+        String iniPath = getDataDirectory() + "/php.ini";
+        String serverPath = getDataDirectory() + file;
+        String ansiArg = MainActivity.ansiMode ? "--enable-ansi" : "--disable-ansi";
+
+        List<String> args = new ArrayList<>();
+        File busybox = null;
+        boolean pty = false;
+        if (AppSettings.ptyConsole(mContext)) {
+            busybox = PhpManager.ensureBusybox(mContext);
+            if (busybox == null) {
+                ConsoleActivity.log("[PE Server] PTY console: busybox is unavailable - using pipe mode"
+                        + " (typed commands will NOT reach the server).");
+            } else if (ptySelfTest(busybox)) {
+                pty = true;
+            } else {
+                ConsoleActivity.log("[PE Server] PTY console: self-test failed - using pipe mode"
+                        + " (typed commands will NOT reach the server). This device may forbid PTYs"
+                        + " for apps, or this busybox may not support 'script -c'.");
+            }
+        }
+
+        if (pty) {
+            String inner = "stty -echo -onlcr 2>/dev/null; exec "
+                    + shellQuote(execPath) + " -c " + shellQuote(iniPath)
+                    + " " + shellQuote(serverPath) + " " + ansiArg + " --disable-readline";
+            args.add(busybox.getAbsolutePath());
+            args.add("script");
+            args.add("-q");
+            args.add("-c");
+            args.add(inner);
+            args.add("/dev/null");
+            ConsoleActivity.log("[PE Server] PTY console: ON - console input should now work.");
+        } else {
+            args.add(execPath);
+            args.add("-c");
+            args.add(iniPath);
+            args.add(serverPath);
+            args.add(ansiArg);
+        }
 
         ProcessBuilder builder = new ProcessBuilder(args);
         builder.redirectErrorStream(true);
@@ -215,6 +259,73 @@ public final class ServerUtils {
             killServer();
         }
         return;
+    }
+
+    /**
+     * Verifies that "busybox script" can hand a child a PTY on this device and
+     * that this busybox build understands "-c COMMAND".
+     *
+     * This is what makes the PTY mode safe to ship blind: if either is missing
+     * we fall back to the plain pipe launch instead of starting a server whose
+     * console would look alive but silently discard every command.
+     *
+     * Runs in well under a second; hard-capped at 4s so it can never hang.
+     */
+    private static boolean ptySelfTest(File busybox) {
+        Process p = null;
+        try {
+            p = new ProcessBuilder(busybox.getAbsolutePath(), "script", "-q", "-c",
+                    "echo PTY_OK", "/dev/null")
+                    .redirectErrorStream(true)
+                    .start();
+            InputStream in = p.getInputStream();
+            StringBuilder sb = new StringBuilder();
+            long deadline = System.currentTimeMillis() + 4000L;
+            byte[] buf = new byte[256];
+            while (System.currentTimeMillis() < deadline) {
+                int avail = in.available();
+                if (avail > 0) {
+                    int n = in.read(buf, 0, Math.min(avail, buf.length));
+                    if (n > 0) {
+                        sb.append(new String(buf, 0, n, "UTF-8"));
+                    }
+                    if (sb.indexOf("PTY_OK") >= 0) {
+                        break;
+                    }
+                } else if (!isAlive(p)) {
+                    break;
+                }
+                Thread.sleep(50L);
+            }
+            String out = sb.toString().replace('\r', ' ').replace('\n', ' ').trim();
+            ConsoleActivity.log("[PE Server] pty self-test says: " + (out.isEmpty() ? "(no output)" : out));
+            return out.contains("PTY_OK");
+        } catch (Exception e) {
+            ConsoleActivity.log("[PE Server] pty self-test error: " + e);
+            return false;
+        } finally {
+            if (p != null) {
+                try {
+                    p.destroyForcibly();
+                } catch (Exception ignored) {
+                    // ignore
+                }
+            }
+        }
+    }
+
+    private static boolean isAlive(Process p) {
+        try {
+            p.exitValue();
+            return false;
+        } catch (IllegalThreadStateException e) {
+            return true;
+        }
+    }
+
+    /** Single-quotes a path for the shell that busybox script spawns. */
+    private static String shellQuote(String s) {
+        return "'" + s.replace("'", "'\\''") + "'";
     }
 
     /** Starts the process and wires up the console log monitor. Returns false on failure. */
