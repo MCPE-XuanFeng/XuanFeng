@@ -10,6 +10,7 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -63,6 +64,10 @@ public class ConsoleActivity extends AppCompatActivity {
 
         label_log.setText(currentLog);
         label_log.setTextSize(font_size);
+        if (AppSettings.consoleAutoScroll(this)) {
+            // Opening the console should land on the newest line.
+            applyScrollOnNextDraw(true, 0);
+        }
 
         edit_command.setOnKeyListener((p1, keyCode, p3) -> {
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -139,10 +144,72 @@ public class ConsoleActivity extends AppCompatActivity {
         final CharSequence result = MainActivity.ansiMode ? Html.fromHtml(line) : (line + "\n");
         currentLog.append(result);
         if (instance != null) {
-            instance.runOnUiThread(() -> {
-                label_log.append(result);
-                scroll_log.fullScroll(ScrollView.FOCUS_DOWN);
-            });
+            instance.runOnUiThread(() -> followNewOutput(result));
+        }
+    }
+
+    /**
+     * Appends one line and puts the log where the user expects it.
+     *
+     * label_log is selectable, so appending text makes the TextView reset its
+     * own scroll anchor and drag the parent ScrollView back to the top - and
+     * the old in-line fullScroll() was computed against the *previous* content
+     * height anyway. So: note where we were, append, then settle the position
+     * once the layout pass for the new text has run.
+     *
+     * AppSettings#consoleAutoScroll() decides the direction: on = jump to the
+     * newest line, off = stay exactly where the user was.
+     */
+    private static void followNewOutput(CharSequence result) {
+        if (label_log == null || scroll_log == null) {
+            return;
+        }
+        final boolean follow = AppSettings.consoleAutoScroll(instance);
+        final int keepY = scroll_log.getScrollY();
+        label_log.append(result);
+        applyScrollOnNextDraw(follow, keepY);
+    }
+
+    /** True while a scroll is already queued for the current burst of output. */
+    private static boolean scrollPending = false;
+
+    private static void applyScrollOnNextDraw(final boolean follow, final int keepY) {
+        final ScrollView sv = scroll_log;
+        final TextView tv = label_log;
+        if (sv == null || tv == null) {
+            return;
+        }
+        if (scrollPending) {
+            // A hook is already queued for this burst; it uses the position
+            // captured before the first line of the burst landed, which is
+            // exactly what we want.
+            return;
+        }
+        ViewTreeObserver vto = tv.getViewTreeObserver();
+        if (vto == null || !vto.isAlive()) {
+            tv.post(() -> settleScroll(sv, follow, keepY));
+            return;
+        }
+        scrollPending = true;
+        vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                ViewTreeObserver o = tv.getViewTreeObserver();
+                if (o != null && o.isAlive()) {
+                    o.removeOnPreDrawListener(this);
+                }
+                scrollPending = false;
+                settleScroll(sv, follow, keepY);
+                return true;
+            }
+        });
+    }
+
+    private static void settleScroll(ScrollView sv, boolean follow, int keepY) {
+        if (follow) {
+            sv.fullScroll(ScrollView.FOCUS_DOWN);
+        } else {
+            sv.scrollTo(0, keepY);
         }
     }
 }

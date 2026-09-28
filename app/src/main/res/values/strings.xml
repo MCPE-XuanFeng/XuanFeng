@@ -119,6 +119,8 @@
     <string name="settings_pty_console">PTY console mode</string>
     <string name="settings_pty_console_hint">Runs the server through a pseudo-terminal so typed commands actually reach it. Turn this off to launch it the plain way instead.</string>
     <string name="settings_pty_changed">PTY console mode takes effect the next time the server starts.</string>
+    <string name="settings_console_autoscroll">Scroll to the newest line</string>
+    <string name="settings_console_autoscroll_hint">When on, new console output jumps to the latest line. Turn it off to keep the log exactly where you left it.</string>
 
     <string name="console_hint">Type a command and tap Send. Use /stop to shut down the server.</string>
 </resources>

@@ -26,6 +26,7 @@ public final class AppSettings {
     public static final String KEY_ACCENT = "accent";
     public static final String KEY_BG_IMAGE = "bg_image_uri";
     public static final String KEY_PTY_CONSOLE = "pty_console";
+    public static final String KEY_CONSOLE_AUTOSCROLL = "console_autoscroll";
 
     private AppSettings() {
     }
@@ -73,6 +74,22 @@ public final class AppSettings {
 
     public static void setPtyConsole(Context c, boolean enabled) {
         prefs(c).edit().putBoolean(KEY_PTY_CONSOLE, enabled).apply();
+    }
+
+    /**
+     * Whether new console output should scroll the log to the newest line.
+     *
+     * The log TextView is selectable, so appending text makes it reset its
+     * selection/scroll anchor (that is what dragged the view to the top);
+     * when this is off we actively restore the previous scroll position
+     * instead of just doing nothing.
+     */
+    public static boolean consoleAutoScroll(Context c) {
+        return prefs(c).getBoolean(KEY_CONSOLE_AUTOSCROLL, true);
+    }
+
+    public static void setConsoleAutoScroll(Context c, boolean enabled) {
+        prefs(c).edit().putBoolean(KEY_CONSOLE_AUTOSCROLL, enabled).apply();
     }
 
     /** Night mode to force for the current theme preference. */

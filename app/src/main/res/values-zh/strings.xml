@@ -119,6 +119,8 @@
     <string name="settings_pty_console">PTY 控制台模式</string>
     <string name="settings_pty_console_hint">通过伪终端启动服务器，这样在控制台输入的指令才能真正送到服务器。关掉则改回普通管道方式启动。</string>
     <string name="settings_pty_changed">PTY 控制台模式将在下次启动服务器时生效。</string>
+    <string name="settings_console_autoscroll">有新内容时滚动到最新一行</string>
+    <string name="settings_console_autoscroll_hint">开启后，控制台出现新内容时会跳到最新一行；关闭后日志停在你当前查看的位置不动。</string>
 
     <string name="console_hint">输入命令后点“发送”。使用 /stop 关闭服务器。</string>
 </resources>

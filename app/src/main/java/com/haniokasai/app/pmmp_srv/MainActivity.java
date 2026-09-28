@@ -506,6 +506,9 @@ public class MainActivity extends AppCompatActivity {
         MaterialCheckBox checkPty = view.findViewById(R.id.check_pty_console);
         checkPty.setChecked(AppSettings.ptyConsole(this));
 
+        MaterialCheckBox checkAutoScroll = view.findViewById(R.id.check_console_autoscroll);
+        checkAutoScroll.setChecked(AppSettings.consoleAutoScroll(this));
+
         view.findViewById(R.id.button_change_bg).setOnClickListener(v -> {
             bgLauncher.launch(new String[]{"image/*"});
         });
@@ -544,6 +547,9 @@ public class MainActivity extends AppCompatActivity {
             if (ptyChanged) {
                 AppSettings.setPtyConsole(this, newPty);
             }
+
+            // Takes effect immediately: the console reads it on every line.
+            AppSettings.setConsoleAutoScroll(this, checkAutoScroll.isChecked());
 
             toast(getString(R.string.settings_applied));
             if (ptyChanged) {
