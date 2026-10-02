@@ -82,12 +82,28 @@ public final class UiUtils {
             }
         }
         if (!loaded) {
-            backdrop.setImageResource(R.drawable.default_bg);
+            backdrop.setImageResource(defaultBackdropResource(activity));
         }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             backdrop.setRenderEffect(
                     RenderEffect.createBlurEffect(26f, 26f, Shader.TileMode.CLAMP));
         }
+    }
+
+    /**
+     * Picks the built-in backdrop that matches the current orientation.
+     *
+     * The two defaults have very different aspect ratios (landscape 1280x720 vs
+     * portrait 1080x1920); the ImageView uses centerCrop, so showing the
+     * landscape one in portrait crops away most of the image. "auto" follows
+     * the sensor, so the live window orientation is the right signal there.
+     */
+    private static int defaultBackdropResource(AppCompatActivity activity) {
+        int orientation = activity.getResources().getConfiguration().orientation;
+        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
+            return R.drawable.default_bg_portrait;
+        }
+        return R.drawable.default_bg;
     }
 }
