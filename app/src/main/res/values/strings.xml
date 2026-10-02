@@ -123,4 +123,29 @@
     <string name="settings_console_autoscroll_hint">When on, new console output jumps to the latest line. Turn it off to keep the log exactly where you left it.</string>
 
     <string name="console_hint">Type a command and tap Send. Use /stop to shut down the server.</string>
+
+    <!-- frp tunnel (Material 3) -->
+    <string name="title_frp">frp Tunnel</string>
+    <string name="menu_frp">frp Tunnel</string>
+    <string name="frp_enable">Enable frp tunnel</string>
+    <string name="frp_enable_hint">Expose the MCPE server to the internet through an frp server you control. The frp client (frpc) is downloaded into the app on first install.</string>
+    <string name="frp_unsupported_abi">frpc is a linux/arm64 binary and needs an arm64 device (this device: %1$s). Install frp only on an arm64 phone.</string>
+    <string name="frp_server_addr">frp server address</string>
+    <string name="frp_server_port">Server port</string>
+    <string name="frp_local_port">Local port</string>
+    <string name="frp_remote_port">Remote port</string>
+    <string name="frp_token">Token</string>
+    <string name="frp_version">frp version</string>
+    <string name="frp_custom_url_hint">Custom download URL (optional) — leave empty to use the default release</string>
+    <string name="frp_note">MCPE uses UDP on port 19132 by default. The tunnel proxy type is set to udp automatically.</string>
+    <string name="frp_install">Save &amp; Install / Update frpc</string>
+    <string name="frp_downloading">Downloading %s …</string>
+    <string name="frp_extracting">Extracting frpc binary…</string>
+    <string name="frp_installed">frpc installed: %s</string>
+    <string name="frp_install_failed">frpc install failed: %s</string>
+    <string name="frp_not_installed">not installed</string>
+    <string name="frp_running">running</string>
+    <string name="frp_installed_status">installed: %s</string>
+    <string name="frp_status_title">frpc status</string>
+    <string name="frp_addr_required">Set the frp server address before enabling the tunnel.</string>
 </resources>

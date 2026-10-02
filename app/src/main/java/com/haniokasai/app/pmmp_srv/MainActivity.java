@@ -64,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
             BL_TWITTER = TWITTER + 1,
             HELP = BL_TWITTER + 1;
 
-    public static Intent serverIntent = null;
     public static MainActivity instance = null;
     public static MaterialCheckBox check_ansi = null;
     public static MaterialButton button_start = null, button_stop = null;
@@ -153,16 +152,14 @@ public class MainActivity extends AppCompatActivity {
         button_start.setOnClickListener(v -> {
             isStarted = true;
             refreshEnabled();
-            serverIntent = new Intent(instance, ServerService.class);
-            startService(serverIntent);
-            // Spawn the PHP process on a worker thread: process start plus PHP
-            // preparation can be slow and must not block the UI thread (ANR).
-            new Thread(ServerUtils::runServer).start();
+            // Hand the whole server lifecycle to the foreground service so the
+            // server (and the frp tunnel) keep running after the activity is
+            // backgrounded. The service owns the process; the UI just sends intents.
+            startService(new Intent(instance, ServerService.class).setAction(ServerService.ACTION_START));
         });
         button_stop.setOnClickListener(v -> {
-            if (ServerUtils.isRunning()) {
-                ServerUtils.writeCommand("stop");
-            }
+            // Ask the service to stop the server gracefully.
+            startService(new Intent(instance, ServerService.class).setAction(ServerService.ACTION_STOP));
         });
         button_open_installer.setOnClickListener(v -> startActivity(new Intent(instance, InstallPhpActivity.class)));
 
@@ -240,16 +237,6 @@ public class MainActivity extends AppCompatActivity {
             button_start.setEnabled(!isStarted);
         }
         button_stop.setEnabled(isStarted);
-    }
-
-    public static void stopNotifyService() {
-        if (instance != null && serverIntent != null) {
-            instance.runOnUiThread(() -> {
-                isStarted = false;
-                refreshEnabled();
-                instance.stopService(serverIntent);
-            });
-        }
     }
 
     public static String getInternetString(String url) {
@@ -384,10 +371,10 @@ public class MainActivity extends AppCompatActivity {
             startActivity(new Intent(instance, InstallPhpActivity.class));
             return true;
         } else if (id == R.id.menu_kill) {
-            ServerUtils.killServer();
-            if (serverIntent != null) stopService(serverIntent);
             isStarted = false;
             refreshEnabled();
+            ServerUtils.killServer();
+            startService(new Intent(instance, ServerService.class).setAction(ServerService.ACTION_KILL));
             return true;
         } else if (id == R.id.menu_download) {
             AlertDialog.Builder download_dialog_builder = new AlertDialog.Builder(this);
@@ -460,6 +447,9 @@ public class MainActivity extends AppCompatActivity {
             return true;
         } else if (id == R.id.menu_settings) {
             showSettingsDialog();
+            return true;
+        } else if (id == R.id.menu_frp) {
+            startActivity(new Intent(instance, FrpActivity.class));
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -615,12 +605,23 @@ public class MainActivity extends AppCompatActivity {
     public void serverdel() {
         new Thread(() -> {
             ServerUtils.killServer();
-            if (serverIntent != null) stopService(serverIntent);
+            startService(new Intent(instance, ServerService.class).setAction(ServerService.ACTION_KILL));
             if (ServerUtils.RemoveSrvDirectory()) {
                 runOnUiThread(() -> toast(R.string.message_delete_success));
             } else {
                 runOnUiThread(() -> toast(R.string.message_delete_failed));
             }
         }).start();
+    }
+
+    /**
+     * Called by ServerService when the server process actually exits, so the UI
+     * reflects the stopped state even if the activity was backgrounded.
+     */
+    public static void notifyServerStopped() {
+        isStarted = false;
+        if (instance != null) {
+            instance.runOnUiThread(() -> refreshEnabled());
+        }
     }
 }

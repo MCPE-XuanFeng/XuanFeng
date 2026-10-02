@@ -28,6 +28,15 @@ public final class AppSettings {
     public static final String KEY_PTY_CONSOLE = "pty_console";
     public static final String KEY_CONSOLE_AUTOSCROLL = "console_autoscroll";
 
+    // frp tunnel (expose the MCPE server through a public frp server).
+    public static final String KEY_FRP_ENABLED = "frp_enabled";
+    public static final String KEY_FRP_SERVER_ADDR = "frp_server_addr";
+    public static final String KEY_FRP_SERVER_PORT = "frp_server_port";
+    public static final String KEY_FRP_TOKEN = "frp_token";
+    public static final String KEY_FRP_LOCAL_PORT = "frp_local_port";
+    public static final String KEY_FRP_REMOTE_PORT = "frp_remote_port";
+    public static final String KEY_FRP_VERSION = "frp_version";
+
     private AppSettings() {
     }
 
@@ -90,6 +99,64 @@ public final class AppSettings {
 
     public static void setConsoleAutoScroll(Context c, boolean enabled) {
         prefs(c).edit().putBoolean(KEY_CONSOLE_AUTOSCROLL, enabled).apply();
+    }
+
+    // ---- frp tunnel ----------------------------------------------------
+
+    public static boolean frpEnabled(Context c) {
+        return prefs(c).getBoolean(KEY_FRP_ENABLED, false);
+    }
+
+    public static void setFrpEnabled(Context c, boolean enabled) {
+        prefs(c).edit().putBoolean(KEY_FRP_ENABLED, enabled).apply();
+    }
+
+    public static String frpServerAddr(Context c) {
+        return prefs(c).getString(KEY_FRP_SERVER_ADDR, "");
+    }
+
+    public static void setFrpServerAddr(Context c, String addr) {
+        prefs(c).edit().putString(KEY_FRP_SERVER_ADDR, addr).apply();
+    }
+
+    public static int frpServerPort(Context c) {
+        return prefs(c).getInt(KEY_FRP_SERVER_PORT, 7000);
+    }
+
+    public static void setFrpServerPort(Context c, int port) {
+        prefs(c).edit().putInt(KEY_FRP_SERVER_PORT, port).apply();
+    }
+
+    public static String frpToken(Context c) {
+        return prefs(c).getString(KEY_FRP_TOKEN, "");
+    }
+
+    public static void setFrpToken(Context c, String token) {
+        prefs(c).edit().putString(KEY_FRP_TOKEN, token).apply();
+    }
+
+    public static int frpLocalPort(Context c) {
+        return prefs(c).getInt(KEY_FRP_LOCAL_PORT, 19132);
+    }
+
+    public static void setFrpLocalPort(Context c, int port) {
+        prefs(c).edit().putInt(KEY_FRP_LOCAL_PORT, port).apply();
+    }
+
+    public static int frpRemotePort(Context c) {
+        return prefs(c).getInt(KEY_FRP_REMOTE_PORT, 19132);
+    }
+
+    public static void setFrpRemotePort(Context c, int port) {
+        prefs(c).edit().putInt(KEY_FRP_REMOTE_PORT, port).apply();
+    }
+
+    public static String frpVersion(Context c) {
+        return prefs(c).getString(KEY_FRP_VERSION, FrpManager.DEFAULT_VERSION);
+    }
+
+    public static void setFrpVersion(Context c, String version) {
+        prefs(c).edit().putString(KEY_FRP_VERSION, version).apply();
     }
 
     /** Night mode to force for the current theme preference. */

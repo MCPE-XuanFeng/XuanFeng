@@ -137,7 +137,7 @@ public final class ServerUtils {
         String execPath = PhpManager.prepareExecutable(mContext);
         if (execPath == null) {
             ConsoleActivity.log("[PE Server] php binary missing. Install it via Install PHP.");
-            MainActivity.stopNotifyService();
+            ServerService.onServerExited();
             return;
         }
         ConsoleActivity.log("[PE Server] Using php: " + execPath);
@@ -255,7 +255,7 @@ public final class ServerUtils {
             } else {
                 ConsoleActivity.log("[PE Server] php binary missing at " + getPhpBinaryPath());
             }
-            MainActivity.stopNotifyService();
+            ServerService.onServerExited();
             killServer();
         }
         return;
@@ -377,7 +377,7 @@ public final class ServerUtils {
                     }
                 }
                 ConsoleActivity.log("[PE Server] Server was stopped.");
-                MainActivity.stopNotifyService();
+                ServerService.onServerExited();
             }
         };
         tMonitor.start();

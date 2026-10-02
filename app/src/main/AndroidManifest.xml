@@ -49,6 +49,12 @@
             android:screenOrientation="landscape"
             android:label="@string/title_install_php" />
 
+        <activity
+            android:name=".FrpActivity"
+            android:exported="false"
+            android:screenOrientation="landscape"
+            android:label="@string/title_frp" />
+
         <service
             android:name=".ServerService"
             android:exported="false"

@@ -14,6 +14,11 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/menu_frp"
+        android:title="@string/menu_frp"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/menu_download"
         android:title="@string/menu_download"
         app:showAsAction="never" />
