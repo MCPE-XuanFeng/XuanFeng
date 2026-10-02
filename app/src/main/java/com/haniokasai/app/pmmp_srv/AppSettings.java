@@ -27,6 +27,7 @@ public final class AppSettings {
     public static final String KEY_BG_IMAGE = "bg_image_uri";
     public static final String KEY_PTY_CONSOLE = "pty_console";
     public static final String KEY_CONSOLE_AUTOSCROLL = "console_autoscroll";
+    public static final String KEY_ORIENTATION = "orientation";
 
     // frp tunnel (expose the MCPE server through a public frp server).
     public static final String KEY_FRP_ENABLED = "frp_enabled";
@@ -104,6 +105,51 @@ public final class AppSettings {
 
     public static void setConsoleAutoScroll(Context c, boolean enabled) {
         prefs(c).edit().putBoolean(KEY_CONSOLE_AUTOSCROLL, enabled).apply();
+    }
+
+    // ---- screen orientation --------------------------------------------
+
+    /**
+     * Preferred screen orientation: {@code "landscape"} (default),
+     * {@code "portrait"} or {@code "auto"} (follow the sensor).
+     *
+     * The app was landscape-only for a long time because the console log and the
+     * server controls are laid out side by side; portrait is offered for people
+     * who want the app to follow the device instead of being force-rotated.
+     */
+    public static String orientation(Context c) {
+        String v = prefs(c).getString(KEY_ORIENTATION, "landscape");
+        if ("portrait".equals(v) || "auto".equals(v)) return v;
+        return "landscape";
+    }
+
+    public static void setOrientation(Context c, String value) {
+        prefs(c).edit().putString(KEY_ORIENTATION, value).apply();
+    }
+
+    /** Maps the stored preference to an ActivityInfo.SCREREEN_ORIENTATION_* value. */
+    public static int orientationConstant(Context c) {
+        switch (orientation(c)) {
+            case "portrait":
+                return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+            case "auto":
+                return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+            case "landscape":
+            default:
+                return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+        }
+    }
+
+    /**
+     * Applies the stored orientation to an Activity.
+     *
+     * Must be called after super.onCreate(): setRequestedOrientation() during
+     * Activity construction is unreliable, and the manifest's hardcoded
+     * android:screenOrientation="landscape" is only the initial value - this
+     * call is what actually honours the user preference.
+     */
+    public static void applyOrientation(android.app.Activity a) {
+        a.setRequestedOrientation(orientationConstant(a));
     }
 
     // ---- frp tunnel ----------------------------------------------------

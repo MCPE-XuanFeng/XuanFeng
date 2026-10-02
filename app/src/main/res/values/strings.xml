@@ -115,6 +115,10 @@
     <string name="accent_purple">Purple</string>
     <string name="accent_amber">Amber</string>
     <string name="accent_teal">Teal</string>
+    <string name="settings_orientation">Screen orientation</string>
+    <string name="orientation_landscape">Landscape</string>
+    <string name="orientation_portrait">Portrait</string>
+    <string name="orientation_auto">Follow system</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
     <string name="settings_applied">Settings applied</string>

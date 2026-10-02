@@ -115,6 +115,10 @@
     <string name="accent_purple">紫色</string>
     <string name="accent_amber">琥珀色</string>
     <string name="accent_teal">青色</string>
+    <string name="settings_orientation">屏幕方向</string>
+    <string name="orientation_landscape">横屏</string>
+    <string name="orientation_portrait">竖屏</string>
+    <string name="orientation_auto">跟随系统</string>
     <string name="dialog_ok">确定</string>
     <string name="dialog_cancel">取消</string>
     <string name="settings_applied">设置已应用</string>

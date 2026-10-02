@@ -111,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppSettings.nightMode(this));
         setTheme(AppSettings.themeRes(this));
         super.onCreate(savedInstanceState);
+        AppSettings.applyOrientation(this);
         setContentView(R.layout.activity_main);
         UiUtils.setupEdgeToEdge(this, findViewById(R.id.root));
         UiUtils.applyGlassBackdrop(this, (ImageView) findViewById(R.id.glassBackdrop));
@@ -474,6 +475,20 @@ public class MainActivity extends AppCompatActivity {
         RadioGroup rgLang = view.findViewById(R.id.rg_lang);
         RadioGroup rgTheme = view.findViewById(R.id.rg_theme);
         RadioGroup rgAccent = view.findViewById(R.id.rg_accent);
+        RadioGroup rgOrientation = view.findViewById(R.id.rg_orientation);
+
+        switch (AppSettings.orientation(this)) {
+            case "portrait":
+                rgOrientation.check(R.id.rb_orientation_portrait);
+                break;
+            case "auto":
+                rgOrientation.check(R.id.rb_orientation_auto);
+                break;
+            case "landscape":
+            default:
+                rgOrientation.check(R.id.rb_orientation_landscape);
+                break;
+        }
 
         String lang = AppSettings.lang(this);
         if (lang.isEmpty()) rgLang.check(R.id.rb_lang_sys);
@@ -540,6 +555,12 @@ public class MainActivity extends AppCompatActivity {
             ed.putString(AppSettings.KEY_LANG, newLang);
             ed.putString(AppSettings.KEY_THEME, newTheme);
             ed.putString(AppSettings.KEY_ACCENT, newAccent);
+
+            String newOrientation = "landscape";
+            int oid = rgOrientation.getCheckedRadioButtonId();
+            if (oid == R.id.rb_orientation_portrait) newOrientation = "portrait";
+            else if (oid == R.id.rb_orientation_auto) newOrientation = "auto";
+            ed.putString(AppSettings.KEY_ORIENTATION, newOrientation);
             ed.apply();
 
             boolean newPty = checkPty.isChecked();

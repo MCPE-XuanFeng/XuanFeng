@@ -121,6 +121,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:text="@string/settings_orientation" />
+
+        <RadioGroup
+            android:id="@+id/rg_orientation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp">
+
+            <RadioButton
+                android:id="@+id/rb_orientation_landscape"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/orientation_landscape" />
+
+            <RadioButton
+                android:id="@+id/rb_orientation_portrait"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/orientation_portrait" />
+
+            <RadioButton
+                android:id="@+id/rb_orientation_auto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/orientation_auto" />
+        </RadioGroup>
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="@string/settings_console_title" />
 
         <com.google.android.material.checkbox.MaterialCheckBox

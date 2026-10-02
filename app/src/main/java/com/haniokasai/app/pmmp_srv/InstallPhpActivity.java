@@ -79,6 +79,7 @@ public class InstallPhpActivity extends AppCompatActivity {
         AppCompatDelegate.setDefaultNightMode(AppSettings.nightMode(this));
         setTheme(AppSettings.themeRes(this));
         super.onCreate(savedInstanceState);
+        AppSettings.applyOrientation(this);
         setContentView(R.layout.activity_install_php);
         UiUtils.setupEdgeToEdge(this, findViewById(R.id.root));
         UiUtils.applyGlassBackdrop(this, (ImageView) findViewById(R.id.glassBackdrop));
