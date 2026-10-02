@@ -33,7 +33,6 @@ public class InstallPhpActivity extends AppCompatActivity {
     private static final int SRC_BUNDLED = 1;
     private static final int SRC_CUSTOM = 2;
     private static final int SRC_LOCAL = 3;
-    private static final int SRC_XUANFENG = 4;
 
     private Spinner spinnerSource;
     private Spinner spinnerVersion;
@@ -104,8 +103,7 @@ public class InstallPhpActivity extends AppCompatActivity {
                 getString(R.string.php_source_pmmp),
                 getString(R.string.php_source_bundled),
                 getString(R.string.php_source_custom),
-                getString(R.string.php_source_local),
-                getString(R.string.php_source_xuanfeng)
+                getString(R.string.php_source_local)
         });
         sourceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerSource.setAdapter(sourceAdapter);
@@ -168,17 +166,6 @@ public class InstallPhpActivity extends AppCompatActivity {
             editCustomUrl.setEnabled(true);
             textAbiWarning.setVisibility(View.GONE);
             buttonInstall.setEnabled(!busy);
-        } else if (position == SRC_XUANFENG) {
-            spinnerVersion.setEnabled(false);
-            editCustomUrl.setEnabled(false);
-            if (!PhpManager.isArm64()) {
-                textAbiWarning.setText(getString(R.string.php_unsupported_abi, PhpManager.getAbiSummary()));
-                textAbiWarning.setVisibility(View.VISIBLE);
-                buttonInstall.setEnabled(false);
-            } else {
-                textAbiWarning.setVisibility(View.GONE);
-                buttonInstall.setEnabled(!busy);
-            }
         } else { // local file
             spinnerVersion.setEnabled(false);
             editCustomUrl.setEnabled(false);
@@ -265,10 +252,6 @@ public class InstallPhpActivity extends AppCompatActivity {
                 onSourceChanged(src);
                 return;
             }
-            textStatus.setText(getString(R.string.php_downloading, url));
-            new Thread(() -> PhpManager.installFromUrl(this, url, listener)).start();
-        } else if (src == SRC_XUANFENG) {
-            String url = PhpManager.XUANFENG_PHP_RELEASE_URL;
             textStatus.setText(getString(R.string.php_downloading, url));
             new Thread(() -> PhpManager.installFromUrl(this, url, listener)).start();
         } else { // local file

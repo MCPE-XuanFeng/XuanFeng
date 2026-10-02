@@ -44,13 +44,6 @@ public class PhpManager {
 
     public static final String TAG = "PhpManager";
 
-    /**
-     * MCPE-XuanFeng's prebuilt Android AArch64 PHP, distributed as a single raw
-     * ELF binary (not a tarball) via GitHub Releases. See the repo README.
-     */
-    public static final String XUANFENG_PHP_RELEASE_URL =
-            "https://github.com/MCPE-XuanFeng/Android-AARCH64-PMMP-PHP/releases/latest/download/php";
-
     public static class PhpRelease {
         public final String label;
         public final String pmMajor;
@@ -182,10 +175,9 @@ public class PhpManager {
      * Downloads a PHP build and installs the php binary.
      *
      * The downloaded artifact may be either a .tar.gz archive (pmmp/PHP-Binaries,
-     * custom builds) or a single raw ELF binary (e.g. the MCPE-XuanFeng
-     * Android-AARCH64-PMMP-PHP release asset named "php"). We auto-detect by
-     * inspecting the gzip magic bytes and handle both transparently, so a single
-     * code path serves every source.
+     * custom builds) or a single raw ELF binary (the "custom URL" source can point
+     * at a raw binary). We auto-detect by inspecting the gzip magic bytes and
+     * handle both transparently, so a single code path serves every source.
      */
     public static void installFromUrl(Context context, String url, InstallListener listener) {
         File appDir = new File(context.getApplicationInfo().dataDir);
