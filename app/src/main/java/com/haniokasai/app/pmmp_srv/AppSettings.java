@@ -37,6 +37,11 @@ public final class AppSettings {
     public static final String KEY_FRP_REMOTE_PORT = "frp_remote_port";
     public static final String KEY_FRP_VERSION = "frp_version";
 
+    // Download proxy (GitHub release assets are unreachable without one in some networks).
+    public static final String KEY_PROXY_ENABLED = "proxy_enabled";
+    public static final String KEY_PROXY_HOST = "proxy_host";
+    public static final String KEY_PROXY_PORT = "proxy_port";
+
     private AppSettings() {
     }
 
@@ -157,6 +162,50 @@ public final class AppSettings {
 
     public static void setFrpVersion(Context c, String version) {
         prefs(c).edit().putString(KEY_FRP_VERSION, version).apply();
+    }
+
+    // ---- download proxy -------------------------------------------------
+
+    /**
+     * Whether downloads (PHP builds, frpc) should go through an HTTP proxy.
+     *
+     * GitHub release assets are served from objects.githubusercontent.com, which
+     * is unreachable from some networks; enabling this routes them through the
+     * user's local proxy instead.
+     */
+    public static boolean proxyEnabled() {
+        return prefs(AppHolder.ctx).getBoolean(KEY_PROXY_ENABLED, false);
+    }
+
+    public static void setProxyEnabled(Context c, boolean enabled) {
+        prefs(c).edit().putBoolean(KEY_PROXY_ENABLED, enabled).apply();
+    }
+
+    public static String proxyHost() {
+        return prefs(AppHolder.ctx).getString(KEY_PROXY_HOST, "127.0.0.1");
+    }
+
+    public static void setProxyHost(Context c, String host) {
+        prefs(c).edit().putString(KEY_PROXY_HOST, host).apply();
+    }
+
+    public static int proxyPort() {
+        return prefs(AppHolder.ctx).getInt(KEY_PROXY_PORT, 7897);
+    }
+
+    public static void setProxyPort(Context c, int port) {
+        prefs(c).edit().putInt(KEY_PROXY_PORT, port).apply();
+    }
+
+    /**
+     * A process-wide application context, so Context-free getters (used by the
+     * download helpers on background threads) can still reach the prefs.
+     */
+    public static final class AppHolder {
+        public static Context ctx;
+
+        private AppHolder() {
+        }
     }
 
     /** Night mode to force for the current theme preference. */

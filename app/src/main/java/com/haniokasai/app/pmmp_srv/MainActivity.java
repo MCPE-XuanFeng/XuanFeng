@@ -198,7 +198,17 @@ public class MainActivity extends AppCompatActivity {
         dialog.setMessage(getString(R.string.message_installing));
         dialog.show();
         new Thread(() -> {
-            PhpManager.installBundled(instance, new PhpManager.InstallListener() {
+            // Pick the newest bundled build this device can actually run.
+            java.util.List<PhpManager.BundledBuild> builds = PhpManager.bundledBuilds();
+            PhpManager.BundledBuild pick = builds.get(0);
+            for (PhpManager.BundledBuild b : builds) {
+                boolean ok = b.arm64 ? PhpManager.isArm64() : PhpManager.deviceSupports32Bit();
+                if (ok) {
+                    pick = b;
+                    break;
+                }
+            }
+            PhpManager.installBundled(instance, pick, new PhpManager.InstallListener() {
                 @Override
                 public void onProgress(String message) {
                     runOnUiThread(() -> dialog.setMessage(message));

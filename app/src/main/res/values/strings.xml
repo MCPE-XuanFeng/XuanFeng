@@ -73,9 +73,12 @@
     <string name="php_install_select_version">PHP version</string>
     <string name="php_install_select_source">Source</string>
     <string name="php_source_pmmp">pmmp/PHP-Binaries (PHP 8.x, arm64)</string>
-    <string name="php_source_bundled">Bundled binary (PHP 7.x)</string>
+    <string name="php_source_bundled">Bundled build (offline, 5.5.6 – 8.0.28)</string>
     <string name="php_source_custom">Custom URL (self-built)</string>
     <string name="php_custom_url_hint">https://…/PHP-x.y-Android-arm64-PMx.tar.gz</string>
+    <string name="proxy_enable">Use proxy for downloads</string>
+    <string name="proxy_host">Host</string>
+    <string name="proxy_port">Port</string>
     <string name="button_install">Install</string>
     <string name="php_installing">Installing PHP %s …</string>
     <string name="php_installed">PHP installed: %s</string>

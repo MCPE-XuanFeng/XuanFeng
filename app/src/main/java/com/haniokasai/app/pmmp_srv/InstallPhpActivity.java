@@ -21,6 +21,7 @@ import androidx.appcompat.app.AppCompatDelegate;
 import androidx.appcompat.widget.Toolbar;
 
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.checkbox.MaterialCheckBox;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 import com.google.android.material.textfield.TextInputEditText;
 
@@ -45,6 +46,10 @@ public class InstallPhpActivity extends AppCompatActivity {
     private MaterialButton buttonChooseFile;
     private TextView textLocalFile;
     private TextView textLocalHint;
+    private MaterialCheckBox checkProxy;
+    private View proxyFields;
+    private TextInputEditText editProxyHost;
+    private TextInputEditText editProxyPort;
     private Uri selectedLocalUri = null;
 
     private boolean busy = false;
@@ -98,6 +103,19 @@ public class InstallPhpActivity extends AppCompatActivity {
         textLocalHint = findViewById(R.id.text_local_hint);
         buttonChooseFile.setOnClickListener(v -> pickLocal.launch(new String[]{"*/*"}));
 
+        // ---- download proxy ----
+        checkProxy = findViewById(R.id.check_proxy);
+        proxyFields = findViewById(R.id.proxy_fields);
+        editProxyHost = findViewById(R.id.edit_proxy_host);
+        editProxyPort = findViewById(R.id.edit_proxy_port);
+        boolean proxyOn = AppSettings.proxyEnabled();
+        checkProxy.setChecked(proxyOn);
+        proxyFields.setVisibility(proxyOn ? View.VISIBLE : View.GONE);
+        editProxyHost.setText(AppSettings.proxyHost());
+        editProxyPort.setText(String.valueOf(AppSettings.proxyPort()));
+        checkProxy.setOnCheckedChangeListener((btn, checked) ->
+                proxyFields.setVisibility(checked ? View.VISIBLE : View.GONE));
+
         ArrayAdapter<String> sourceAdapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_spinner_item, new String[]{
                 getString(R.string.php_source_pmmp),
@@ -115,7 +133,6 @@ public class InstallPhpActivity extends AppCompatActivity {
                 }});
         versionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerVersion.setAdapter(versionAdapter);
-
         spinnerSource.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -140,6 +157,7 @@ public class InstallPhpActivity extends AppCompatActivity {
         textLocalHint.setVisibility(View.GONE);
 
         if (position == SRC_PMMP) {
+            setVersionItems(PhpManager.pmmpReleasesLabels(), 0);
             spinnerVersion.setEnabled(true);
             editCustomUrl.setEnabled(false);
             if (!PhpManager.isArm64()) {
@@ -151,16 +169,24 @@ public class InstallPhpActivity extends AppCompatActivity {
                 buttonInstall.setEnabled(!busy);
             }
         } else if (position == SRC_BUNDLED) {
-            spinnerVersion.setEnabled(false);
+            setVersionItems(PhpManager.bundledBuildsLabels(), 0);
+            spinnerVersion.setEnabled(true);
             editCustomUrl.setEnabled(false);
-            if (!PhpManager.isArm64()) {
+            // Warn only when the *selected* build cannot run here: the bundled
+            // set mixes aarch64 builds with older 32-bit ones.
+            int pos = spinnerVersion.getSelectedItemPosition();
+            PhpManager.BundledBuild b = PhpManager.bundledBuilds().get(
+                    Math.min(pos, PhpManager.bundledBuilds().size() - 1));
+            boolean runnable = b.arm64 ? PhpManager.isArm64() : PhpManager.deviceSupports32Bit();
+            if (!runnable) {
                 textAbiWarning.setText(getString(R.string.php_bundled_arch_warning,
                         PhpManager.getAbiSummary()));
                 textAbiWarning.setVisibility(View.VISIBLE);
+                buttonInstall.setEnabled(false);
             } else {
                 textAbiWarning.setVisibility(View.GONE);
+                buttonInstall.setEnabled(!busy);
             }
-            buttonInstall.setEnabled(!busy);
         } else if (position == SRC_CUSTOM) {
             spinnerVersion.setEnabled(false);
             editCustomUrl.setEnabled(true);
@@ -175,6 +201,29 @@ public class InstallPhpActivity extends AppCompatActivity {
             textLocalFile.setVisibility(View.VISIBLE);
             buttonInstall.setEnabled(!busy && selectedLocalUri != null);
         }
+    }
+
+    /** Rebuilds the version spinner for the selected source. */
+    private void setVersionItems(java.util.List<String> labels, int selection) {
+        ArrayAdapter<String> a = new ArrayAdapter<>(this,
+                android.R.layout.simple_spinner_item, labels);
+        a.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        final int sel = Math.max(0, Math.min(selection, labels.size() - 1));
+        spinnerVersion.setAdapter(a);
+        spinnerVersion.setSelection(sel);
+        // Re-evaluate the architecture warning when the user picks another build.
+        spinnerVersion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                if (spinnerSource.getSelectedItemPosition() == SRC_BUNDLED) {
+                    onSourceChanged(SRC_BUNDLED);
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
     }
 
     private void refreshPhpStatus() {
@@ -236,8 +285,17 @@ public class InstallPhpActivity extends AppCompatActivity {
             }
         };
 
+        // Persist the proxy settings before any download starts, so the
+        // background download reads them.
+        saveProxySettings();
+
         if (src == SRC_BUNDLED) {
-            new Thread(() -> PhpManager.installBundled(this, listener)).start();
+            int vpos = spinnerVersion.getSelectedItemPosition();
+            java.util.List<PhpManager.BundledBuild> builds = PhpManager.bundledBuilds();
+            PhpManager.BundledBuild build = builds.get(
+                    Math.max(0, Math.min(vpos, builds.size() - 1)));
+            textStatus.setText(getString(R.string.php_extracting));
+            new Thread(() -> PhpManager.installBundled(this, build, listener)).start();
         } else if (src == SRC_PMMP) {
             int vpos = spinnerVersion.getSelectedItemPosition();
             String url = PhpManager.pmmpReleases().get(vpos).buildUrl();
@@ -264,6 +322,22 @@ public class InstallPhpActivity extends AppCompatActivity {
             }
             textStatus.setText(getString(R.string.php_extracting));
             new Thread(() -> PhpManager.installLocalFile(this, selectedLocalUri, listener)).start();
+        }
+    }
+
+    /** Stores the proxy checkbox/host/port into AppSettings. */
+    private void saveProxySettings() {
+        AppSettings.setProxyEnabled(this, checkProxy.isChecked());
+        String host = editProxyHost.getText() == null ? "" : editProxyHost.getText().toString().trim();
+        if (!host.isEmpty()) {
+            AppSettings.setProxyHost(this, host);
+        }
+        String portStr = editProxyPort.getText() == null ? "" : editProxyPort.getText().toString().trim();
+        try {
+            if (!portStr.isEmpty()) {
+                AppSettings.setProxyPort(this, Integer.parseInt(portStr));
+            }
+        } catch (NumberFormatException ignored) {
         }
     }
 

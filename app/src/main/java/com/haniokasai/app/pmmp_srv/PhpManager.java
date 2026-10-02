@@ -28,13 +28,17 @@ import java.util.List;
 /**
  * Helpers for installing PHP on Android.
  *
+ * - The bundled builds (assets/phpbin) come from the
+ *   MCPE-XuanFeng/Android-AARCH64-PMMP-PHP repository: 14 Android AArch64 PHP
+ *   binaries from 5.5.6 up to 8.0.28, all ZTS. They work fully offline.
  * - pmmp/PHP-Binaries (https://github.com/pmmp/PHP-Binaries) ships rolling
- *   "latest" release tags. Only Android arm64 is published, so pmmp PHP 8.x
- *   requires an arm64 device.
- * - The bundled legacy binary (assets/php) is a PHP 7.x build and is the
- *   fallback for non-arm64 devices.
+ *   "latest" release tags and can supply newer PHP (8.1-8.4) on demand.
+ *   Only Android arm64 is published, so those require an arm64 device.
  * - A "custom URL" lets you install a self-built PHP tarball (e.g. produced
  *   with Veha0001/pmmp-droid or pmmp/PHP-Binaries compile.sh).
+ *
+ * Downloads can optionally go through an HTTP proxy (see AppSettings#proxyEnabled)
+ * because GitHub release assets are unreachable from some networks.
  *
  * Extraction is done in Java with Apache Commons Compress, so we no longer
  * depend on a busybox binary (which often fails with "Permission denied" on
@@ -43,6 +47,49 @@ import java.util.List;
 public class PhpManager {
 
     public static final String TAG = "PhpManager";
+
+    /** Asset sub-directory holding the bundled Android AArch64 PHP builds. */
+    public static final String BUNDLED_DIR = "phpbin";
+
+    /**
+     * One bundled PHP build shipped inside the APK under {@code assets/phpbin}.
+     *
+     * Not all of them are 64-bit: the 5.x and early 7.0 builds are ELF32
+     * (armeabi-v7a) and therefore only run on devices that still support 32-bit
+     * ABIs. {@link #isBinaryCompatibleWithDevice(File)} is the authority on
+     * whether the selected build can actually run.
+     */
+    public static class BundledBuild {
+        public final String assetName;
+        public final String label;
+        public final boolean arm64;
+
+        BundledBuild(String assetName, String label, boolean arm64) {
+            this.assetName = assetName;
+            this.label = label;
+            this.arm64 = arm64;
+        }
+    }
+
+    /** Every PHP build bundled in the APK, newest first. */
+    public static List<BundledBuild> bundledBuilds() {
+        List<BundledBuild> l = new ArrayList<>();
+        l.add(new BundledBuild("php8.0.28", "PHP 8.0.28 (aarch64)", true));
+        l.add(new BundledBuild("php7.3.16", "PHP 7.3.16 (aarch64)", true));
+        l.add(new BundledBuild("php7.3.7", "PHP 7.3.7 (aarch64)", true));
+        l.add(new BundledBuild("php7.2.8", "PHP 7.2.8 (aarch64)", true));
+        l.add(new BundledBuild("php7.2.4", "PHP 7.2.4 (aarch64)", true));
+        l.add(new BundledBuild("php7.2", "PHP 7.2 (aarch64)", true));
+        l.add(new BundledBuild("php7.0.4", "PHP 7.0.4 (aarch64)", true));
+        l.add(new BundledBuild("php7.0.14", "PHP 7.0.14 (arm32)", false));
+        l.add(new BundledBuild("php7.0.9", "PHP 7.0.9 (arm32)", false));
+        l.add(new BundledBuild("php7.0.2", "PHP 7.0.2 (arm32)", false));
+        l.add(new BundledBuild("php7.0.0", "PHP 7.0.0 (arm32)", false));
+        l.add(new BundledBuild("php5.6.10", "PHP 5.6.10 (arm32)", false));
+        l.add(new BundledBuild("php5.6.2", "PHP 5.6.2 (arm32)", false));
+        l.add(new BundledBuild("php5.5.6", "PHP 5.5.6 (arm32)", false));
+        return l;
+    }
 
     public static class PhpRelease {
         public final String label;
@@ -76,8 +123,21 @@ public class PhpManager {
         return list;
     }
 
-    public static boolean isArm64() {
-        for (String abi : Build.SUPPORTED_ABIS) {
+    /** Human-readable labels for the version spinner, in {@link #bundledBuilds()} order. */
+    public static List<String> bundledBuildsLabels() {
+        List<String> l = new ArrayList<>();
+        for (BundledBuild b : bundledBuilds()) l.add(b.label);
+        return l;
+    }
+
+    /** Human-readable labels for the pmmp version spinner. */
+    public static List<String> pmmpReleasesLabels() {
+        List<String> l = new ArrayList<>();
+        for (PhpRelease r : pmmpReleases()) l.add(r.label);
+        return l;
+    }
+
+    public static boolean isArm64() {        for (String abi : Build.SUPPORTED_ABIS) {
             if ("arm64-v8a".equals(abi)) return true;
         }
         return false;
@@ -151,13 +211,17 @@ public class PhpManager {
         void onFailure(String error);
     }
 
-    /** Installs the bundled legacy PHP 7.x binary from assets. */
-    public static void installBundled(Context context, InstallListener listener) {
+    /**
+     * Installs one of the bundled PHP builds from assets/phpbin.
+     *
+     * @param build the build to install (see {@link #bundledBuilds()}).
+     */
+    public static void installBundled(Context context, BundledBuild build, InstallListener listener) {
+        File appDir = new File(context.getApplicationInfo().dataDir);
         try {
-            File appDir = new File(context.getApplicationInfo().dataDir);
             listener.onProgress(context.getString(R.string.php_extracting));
             File php = new File(appDir, "php");
-            copyAsset(context, "php", php);
+            copyAsset(context, BUNDLED_DIR + "/" + build.assetName, php);
             if (!makeExecutable(php)) {
                 throw new Exception("Cannot make PHP executable (permission denied)");
             }
@@ -513,7 +577,7 @@ public class PhpManager {
 
     private static void downloadFile(String url, File saveTo) throws Exception {
         if (saveTo.exists()) saveTo.delete();
-        URLConnection connection = new URL(url).openConnection();
+        URLConnection connection = openConnection(url);
         connection.connect();
         try (InputStream input = new BufferedInputStream(connection.getInputStream());
              OutputStream output = new FileOutputStream(saveTo)) {
@@ -523,6 +587,27 @@ public class PhpManager {
                 output.write(buffer, 0, count);
             }
         }
+    }
+
+    /**
+     * Opens a URL, optionally routed through the user-configured HTTP proxy.
+     *
+     * GitHub release assets live on objects.githubusercontent.com, which is
+     * unreachable from some networks (notably mainland China without a proxy).
+     * When the proxy is enabled we use {@link java.net.Proxy} so plain
+     * {@code HttpURLConnection} honours it without any extra dependency.
+     */
+    private static URLConnection openConnection(String url) throws Exception {
+        URL u = new URL(url);
+        if (AppSettings.proxyEnabled()) {
+            int port = AppSettings.proxyPort();
+            if (port > 0 && port <= 65535) {
+                java.net.Proxy proxy = new java.net.Proxy(java.net.Proxy.Type.HTTP,
+                        new java.net.InetSocketAddress(AppSettings.proxyHost(), port));
+                return u.openConnection(proxy);
+            }
+        }
+        return u.openConnection();
     }
 
     private static File findFile(File root, String name) {
