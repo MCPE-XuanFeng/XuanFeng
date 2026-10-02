@@ -75,6 +75,7 @@
     <string name="php_source_pmmp">pmmp/PHP-Binaries (PHP 8.x, arm64)</string>
     <string name="php_source_bundled">Bundled binary (PHP 7.x)</string>
     <string name="php_source_custom">Custom URL (self-built)</string>
+    <string name="php_source_xuanfeng">XuanFeng AArch64 PHP (MCPE-XuanFeng)</string>
     <string name="php_custom_url_hint">https://…/PHP-x.y-Android-arm64-PMx.tar.gz</string>
     <string name="button_install">Install</string>
     <string name="php_installing">Installing PHP %s …</string>

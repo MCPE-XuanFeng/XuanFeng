@@ -44,6 +44,13 @@ public class PhpManager {
 
     public static final String TAG = "PhpManager";
 
+    /**
+     * MCPE-XuanFeng's prebuilt Android AArch64 PHP, distributed as a single raw
+     * ELF binary (not a tarball) via GitHub Releases. See the repo README.
+     */
+    public static final String XUANFENG_PHP_RELEASE_URL =
+            "https://github.com/MCPE-XuanFeng/Android-AARCH64-PMMP-PHP/releases/latest/download/php";
+
     public static class PhpRelease {
         public final String label;
         public final String pmMajor;
@@ -171,32 +178,44 @@ public class PhpManager {
         }
     }
 
-    /** Downloads a PHP tarball (pmmp or custom) and installs the php binary. */
+    /**
+     * Downloads a PHP build and installs the php binary.
+     *
+     * The downloaded artifact may be either a .tar.gz archive (pmmp/PHP-Binaries,
+     * custom builds) or a single raw ELF binary (e.g. the MCPE-XuanFeng
+     * Android-AARCH64-PMMP-PHP release asset named "php"). We auto-detect by
+     * inspecting the gzip magic bytes and handle both transparently, so a single
+     * code path serves every source.
+     */
     public static void installFromUrl(Context context, String url, InstallListener listener) {
         File appDir = new File(context.getApplicationInfo().dataDir);
-        File cache = new File(appDir, "php_download.tar.gz");
+        File cache = new File(appDir, "php_download.bin");
         try {
             listener.onProgress(context.getString(R.string.php_downloading, url));
             downloadFile(url, cache);
-            File extractDir = new File(appDir, "php_extract");
-            deleteRecursively(extractDir);
-            extractDir.mkdirs();
 
-            listener.onProgress(context.getString(R.string.php_extracting));
-            extractTarGz(cache, extractDir);
-
-            File phpBin = findFile(extractDir, "php");
-            if (phpBin == null) {
-                throw new Exception("php binary not found in archive");
-            }
             File dest = new File(appDir, "php");
-            copyFile(phpBin, dest);
+            if (isGzipFile(cache)) {
+                File extractDir = new File(appDir, "php_extract");
+                deleteRecursively(extractDir);
+                extractDir.mkdirs();
+                listener.onProgress(context.getString(R.string.php_extracting));
+                extractTarGz(cache, extractDir);
+                File phpBin = findFile(extractDir, "php");
+                if (phpBin == null) {
+                    throw new Exception("php binary not found in archive");
+                }
+                copyFile(phpBin, dest);
+                deleteRecursively(extractDir);
+            } else {
+                // Raw binary (e.g. XuanFeng "php"). Copy directly.
+                copyFile(cache, dest);
+            }
+
             if (!makeExecutable(dest)) {
                 throw new Exception("Cannot make PHP executable (permission denied)");
             }
-
             cache.delete();
-            deleteRecursively(extractDir);
             listener.onProgress(context.getString(R.string.php_installed, dest.getAbsolutePath()));
             String ver = testPhp(dest);
             if (ver.startsWith("ERROR:")) {
@@ -205,6 +224,18 @@ public class PhpManager {
             listener.onSuccess(ver);
         } catch (Exception e) {
             listener.onFailure(e.getMessage());
+        }
+    }
+
+    /** True if the file begins with the gzip magic bytes (0x1f 0x8b). */
+    private static boolean isGzipFile(File f) {
+        if (f == null || !f.exists() || f.length() < 2) return false;
+        try (java.io.RandomAccessFile raf = new java.io.RandomAccessFile(f, "r")) {
+            byte[] b = new byte[2];
+            if (raf.read(b) != 2) return false;
+            return (b[0] & 0xff) == 0x1f && (b[1] & 0xff) == 0x8b;
+        } catch (Exception e) {
+            return false;
         }
     }
 
