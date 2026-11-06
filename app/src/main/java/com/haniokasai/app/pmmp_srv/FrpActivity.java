@@ -44,9 +44,11 @@ public class FrpActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppSettings.nightMode(this));
-        setTheme(AppSettings.themeRes(this));
-        super.onCreate(savedInstanceState);
+        AppSettings.applyTheme(this);
+        // Apply the saved orientation BEFORE super.onCreate so the very
+        // first frame already uses the right direction (no landscape flash).
         AppSettings.applyOrientation(this);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_frp);
         UiUtils.setupEdgeToEdge(this, findViewById(R.id.root));
         UiUtils.applyGlassBackdrop(this, (ImageView) findViewById(R.id.glassBackdrop));

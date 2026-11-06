@@ -41,6 +41,8 @@
     <string name="storage_permission_title">All-files access required</string>
     <string name="storage_permission_message">To use /storage/emulated/0/PocketMine, please allow "All files access" for XuanFeng in the next screen.</string>
     <string name="storage_permission_denied">All-files access denied. Server data will fall back to the app-private directory.</string>
+    <string name="storage_grant_button">Grant storage access</string>
+    <string name="storage_missing_hint">No access to /storage/emulated/0. Allow "All files access" in Settings > Permissions for this app, then start the server again.</string>
 	
 	<string name="menu_console">Console</string>
     <string name="menu_kill">Kill server</string>
@@ -88,6 +90,7 @@
     <string name="php_extracting">Extracting PHP binaries…</string>
     <string name="php_current">Current PHP: %s</string>
     <string name="php_none">not installed</string>
+    <string name="php_status_label">PHP status</string>
     <string name="php_bundled_arch_warning">The bundled PHP 7.x is an arm64 build and can only run on arm64 devices (this device: %1$s). A pmmp PHP 8.x build is recommended.</string>
     <string name="php_incompatible">Installed but cannot run: architecture mismatch (binary %1$s, device %2$s). Install a matching PHP 8.x (arm64) via Install PHP.</string>
     <string name="php_run_failed">Installed but failed to execute: %1$s</string>
@@ -115,6 +118,9 @@
     <string name="accent_purple">Purple</string>
     <string name="accent_amber">Amber</string>
     <string name="accent_teal">Teal</string>
+    <string name="accent_gray">Gray</string>
+    <string name="theme_gray">Gray</string>
+    <string name="theme_deepblue">Deep blue</string>
     <string name="settings_orientation">Screen orientation</string>
     <string name="orientation_landscape">Landscape</string>
     <string name="orientation_portrait">Portrait</string>
@@ -155,4 +161,44 @@
     <string name="frp_installed_status">installed: %s</string>
     <string name="frp_status_title">frpc status</string>
     <string name="frp_addr_required">Set the frp server address before enabling the tunnel.</string>
+
+    <!-- Localized console diagnostics -->
+    <string name="log_server_already_running">[Server] Already running; duplicate start request ignored.</string>
+    <string name="log_php_missing">[Server] php binary missing. Install it via Install PHP.</string>
+    <string name="log_using_php">[Server] Using php: %s</string>
+    <string name="log_entry_detected">[Server] Server entry detected: %s</string>
+    <string name="log_no_storage_access">[Server] No access to /storage/emulated/0 (Android 11+ needs All-files-access). Open Settings > Permissions > Files and media > Allow all files, or use the Grant-storage-access button in the settings dialog.</string>
+    <string name="log_entry_missing">[Server] ERROR: server entry file not found: %s</string>
+    <string name="log_dir_requirement">[Server] The server directory %s must contain PocketMine-MP.phar (recommended, menu > Download Server) or the full source tree src/pocketmine/PocketMine.php.</string>
+    <string name="log_src_tip">[Server] TIP: src/pocketmine/ alone is NOT enough - source builds also need the other src/ subfolders AND the vendor/ folder. A PocketMine-MP.phar bundles everything.</string>
+    <string name="log_files_in">[Server] Files in %1$s: %2$s</string>
+    <string name="log_pty_busybox_missing">[Server] PTY console: busybox unavailable - falling back to pipe mode (typed commands will NOT reach the server).</string>
+    <string name="log_pty_selftest_fail">[Server] PTY console: self-test failed - falling back to pipe mode. This device may forbid PTYs for apps, or busybox lacks script -c.</string>
+    <string name="log_pty_on">[Server] PTY console ON - console input should work now.</string>
+    <string name="log_launch_retry">[Server] Launch failed from %1$s; retrying with cwd=%2$s</string>
+    <string name="log_start_failed">[Server] Unable to start PHP.</string>
+    <string name="log_php_diag">[Server] php: size=%1$s canExecute=%2$s arch=%3$s device=%4$s</string>
+    <string name="log_php_not_executable">[Server] php binary is NOT executable. Reinstall PHP via the in-app installer (Settings > Install PHP).</string>
+    <string name="log_php_arch_mismatch">[Server] php architecture (%1$s) is incompatible with this device (%2$s). On an arm64 device use PHP 8.x (arm64) from Install PHP, not the 32-bit bundled PHP 7.x.</string>
+    <string name="log_php_launch_unknown">[Server] php is executable and arch-compatible but failed to launch. See the IOException(s) above for details. The binary may be corrupted, or the device blocks execution from app storage - a fresh arm64 build via Install PHP often helps.</string>
+    <string name="log_php_missing_at">[Server] php binary missing at %s</string>
+    <string name="log_pty_selftest_says">[Server] pty self-test says: %s</string>
+    <string name="log_pty_selftest_error">[Server] pty self-test error: %s</string>
+    <string name="log_start_exception">[Server] Unable to start PHP: %s</string>
+    <string name="log_server_stopped">[Server] Server was stopped.</string>
+    <string name="log_cmd_not_running">[Console] Cannot send command: server is not running. Start the server first.</string>
+    <string name="log_cmd_exited">[Console] Cannot send command: the server process already exited. Check the log for a crash.</string>
+    <string name="log_cmd_failed">[Console] Failed to send command: %s</string>
+    <string name="log_service_started">[Server] Service started in foreground; launching server process.</string>
+    <string name="log_frpc_missing">[frp] Tunnel is enabled but frpc is not installed. Open the frp settings (menu > frp Tunnel) to install it; the server will run without the tunnel for now.</string>
+    <string name="log_stop_requested">[Server] Stop requested; sending stop to the server…</string>
+    <string name="log_force_kill_timeout">[Server] Did not exit in time; force-killing.</string>
+    <string name="log_force_kill">[Server] Force-killing server and tunnel.</string>
+    <string name="log_frp_already">[frp] Already running; not starting a second instance.</string>
+    <string name="log_frp_start_failed">[frp] Failed to start frpc: %s</string>
+    <string name="log_frp_started">[frp] frpc started (config: %s)</string>
+    <string name="log_frp_could_not">[frp] Could not start frpc: %s</string>
+    <string name="log_frp_stopping">[frp] Stopping frpc…</string>
+    <string name="log_frp_exited">[frp] frpc process exited.</string>
+    <string name="log_php_probe">[Server] php probe (%1$s): %2$s</string>
 </resources>

@@ -77,9 +77,11 @@ public class InstallPhpActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppSettings.nightMode(this));
-        setTheme(AppSettings.themeRes(this));
-        super.onCreate(savedInstanceState);
+        AppSettings.applyTheme(this);
+        // Apply the saved orientation BEFORE super.onCreate so the very
+        // first frame already uses the right direction (no landscape flash).
         AppSettings.applyOrientation(this);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_install_php);
         UiUtils.setupEdgeToEdge(this, findViewById(R.id.root));
         UiUtils.applyGlassBackdrop(this, (ImageView) findViewById(R.id.glassBackdrop));
@@ -173,21 +175,7 @@ public class InstallPhpActivity extends AppCompatActivity {
             setVersionItems(PhpManager.bundledBuildsLabels(), 0);
             spinnerVersion.setEnabled(true);
             editCustomUrl.setEnabled(false);
-            // Warn only when the *selected* build cannot run here: the bundled
-            // set mixes aarch64 builds with older 32-bit ones.
-            int pos = spinnerVersion.getSelectedItemPosition();
-            PhpManager.BundledBuild b = PhpManager.bundledBuilds().get(
-                    Math.min(pos, PhpManager.bundledBuilds().size() - 1));
-            boolean runnable = b.arm64 ? PhpManager.isArm64() : PhpManager.deviceSupports32Bit();
-            if (!runnable) {
-                textAbiWarning.setText(getString(R.string.php_bundled_arch_warning,
-                        PhpManager.getAbiSummary()));
-                textAbiWarning.setVisibility(View.VISIBLE);
-                buttonInstall.setEnabled(false);
-            } else {
-                textAbiWarning.setVisibility(View.GONE);
-                buttonInstall.setEnabled(!busy);
-            }
+            updateBundledWarning();
         } else if (position == SRC_CUSTOM) {
             spinnerVersion.setEnabled(false);
             editCustomUrl.setEnabled(true);
@@ -213,11 +201,14 @@ public class InstallPhpActivity extends AppCompatActivity {
         spinnerVersion.setAdapter(a);
         spinnerVersion.setSelection(sel);
         // Re-evaluate the architecture warning when the user picks another build.
+        // NOTE: the listener must NOT call onSourceChanged() again — that used to
+        // rebuild the adapter and snap the selection back to position 0, which is
+        // why the bundled source always installed PHP 8.0.28.
         spinnerVersion.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (spinnerSource.getSelectedItemPosition() == SRC_BUNDLED) {
-                    onSourceChanged(SRC_BUNDLED);
+                    updateBundledWarning();
                 }
             }
 
@@ -225,6 +216,24 @@ public class InstallPhpActivity extends AppCompatActivity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+    }
+
+    /** Updates the ABI warning + install button for the currently selected bundled build. */
+    private void updateBundledWarning() {
+        int pos = spinnerVersion.getSelectedItemPosition();
+        java.util.List<PhpManager.BundledBuild> builds = PhpManager.bundledBuilds();
+        PhpManager.BundledBuild b = builds.get(Math.max(0,
+                Math.min(pos, builds.size() - 1)));
+        boolean runnable = b.arm64 ? PhpManager.isArm64() : PhpManager.deviceSupports32Bit();
+        if (!runnable) {
+            textAbiWarning.setText(getString(R.string.php_bundled_arch_warning,
+                    PhpManager.getAbiSummary()));
+            textAbiWarning.setVisibility(View.VISIBLE);
+            buttonInstall.setEnabled(false);
+        } else {
+            textAbiWarning.setVisibility(View.GONE);
+            buttonInstall.setEnabled(!busy);
+        }
     }
 
     private void refreshPhpStatus() {
@@ -245,7 +254,7 @@ public class InstallPhpActivity extends AppCompatActivity {
                 }
             }
         }
-        textPhpStatus.setText(v);
+        textPhpStatus.setText(getString(R.string.php_current, v));
     }
 
     private void doInstall() {
@@ -269,7 +278,14 @@ public class InstallPhpActivity extends AppCompatActivity {
                     textStatus.setText(getString(R.string.php_installed, versionInfo));
                     refreshPhpStatus();
                     busy = false;
-                    onSourceChanged(spinnerSource.getSelectedItemPosition());
+                    // Do NOT rebuild the version spinner here: onSourceChanged()
+                    // reset the selection back to position 0 (PHP 8.0.28), which
+                    // made it look like the install always picked the newest build.
+                    if (spinnerSource.getSelectedItemPosition() == SRC_BUNDLED) {
+                        updateBundledWarning();
+                    } else {
+                        buttonInstall.setEnabled(true);
+                    }
                     Toast.makeText(InstallPhpActivity.this,
                             getString(R.string.php_installed, versionInfo), Toast.LENGTH_SHORT).show();
                 });
@@ -281,7 +297,11 @@ public class InstallPhpActivity extends AppCompatActivity {
                     progress.setVisibility(View.GONE);
                     textStatus.setText(getString(R.string.php_install_failed, String.valueOf(error)));
                     busy = false;
-                    onSourceChanged(spinnerSource.getSelectedItemPosition());
+                    if (spinnerSource.getSelectedItemPosition() == SRC_BUNDLED) {
+                        updateBundledWarning();
+                    } else {
+                        buttonInstall.setEnabled(true);
+                    }
                 });
             }
         };

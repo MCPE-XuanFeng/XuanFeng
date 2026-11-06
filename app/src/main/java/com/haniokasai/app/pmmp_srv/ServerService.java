@@ -88,7 +88,7 @@ public class ServerService extends Service {
 
     private void startServer() {
         if (mStarted) {
-            ConsoleActivity.log("[Server] Already running; ignoring duplicate start request.");
+            ConsoleActivity.log(R.string.log_server_already_running);
             return;
         }
         mStarted = true;
@@ -101,7 +101,7 @@ public class ServerService extends Service {
         builder.setContentIntent(PendingIntent.getActivity(this, 0,
                 new Intent(getApplicationContext(), MainActivity.class), PendingIntent.FLAG_IMMUTABLE));
         startForeground(1337, builder.build());
-        ConsoleActivity.log("[Server] Service started in foreground; launching server process.");
+        ConsoleActivity.log(R.string.log_service_started);
 
         // Launch on a worker thread: php preparation + startup can be slow and
         // onStartCommand must not block.
@@ -114,9 +114,7 @@ public class ServerService extends Service {
             if (FrpManager.isFrpcInstalled(this)) {
                 FrpManager.start(this);
             } else {
-                ConsoleActivity.log("[frp] Tunnel is enabled but frpc is not installed. "
-                        + "Open the frp settings (menu > frp Tunnel) to install it; "
-                        + "the server will run without the tunnel for now.");
+                ConsoleActivity.log(R.string.log_frpc_missing);
             }
         }
         ServerUtils.runServer();
@@ -128,7 +126,7 @@ public class ServerService extends Service {
             stopSelf();
             return;
         }
-        ConsoleActivity.log("[Server] Stop requested; sending 'stop' to the server…");
+        ConsoleActivity.log(R.string.log_stop_requested);
         ServerUtils.writeCommand("stop");
         // Give the server up to ~4s to exit on its own before we force-kill.
         new Thread(() -> {
@@ -140,7 +138,7 @@ public class ServerService extends Service {
             } catch (InterruptedException ignored) {
             }
             if (ServerUtils.isRunning()) {
-                ConsoleActivity.log("[Server] Did not exit in time; force-killing.");
+                ConsoleActivity.log(R.string.log_force_kill_timeout);
                 ServerUtils.killServer();
             }
             FrpManager.stop();
@@ -155,7 +153,7 @@ public class ServerService extends Service {
 
     private void killNow() {
         mStarted = false;
-        ConsoleActivity.log("[Server] Force-killing server and tunnel.");
+        ConsoleActivity.log(R.string.log_force_kill);
         ServerUtils.killServer();
         FrpManager.stop();
         stopForeground(true);

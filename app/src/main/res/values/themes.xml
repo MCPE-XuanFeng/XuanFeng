@@ -34,93 +34,90 @@
     </style>
 
     <!-- ============================================================= -->
-    <!-- Custom accent themes (used when theme preference == "custom") -->
-    <!-- They inherit the DayNight neutral palette (background/surface) -->
-    <!-- and only override the accent colors.                          -->
+    <!-- Gray theme (default): light-based with a gray neutral palette -->
     <!-- ============================================================= -->
-
-    <style name="Theme.BlueLight.Custom" parent="Theme.Material3.DayNight.NoActionBar">
+    <!-- Deep gray: much darker neutral palette than the previous light gray -->
+    <style name="Theme.BlueLight.Gray" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">#8C99A3</item>
+        <item name="colorOnPrimary">#14181B</item>
+        <item name="colorPrimaryContainer">#33393F</item>
+        <item name="colorOnPrimaryContainer">#D7DEE4</item>
+        <item name="colorSecondary">#8C99A3</item>
+        <item name="colorOnSecondary">#14181B</item>
+        <item name="colorSecondaryContainer">#2F353A</item>
+        <item name="colorOnSecondaryContainer">#D7DEE4</item>
+        <item name="colorTertiary">#93A0AA</item>
+        <item name="colorOnTertiary">#171B1F</item>
+        <item name="colorTertiaryContainer">#363C42</item>
+        <item name="colorOnTertiaryContainer">#DAE1E7</item>
+        <item name="android:colorBackground">#1C1F22</item>
+        <item name="colorSurface">#23272B</item>
+        <item name="colorOnSurface">#E1E4E8</item>
+        <item name="colorSurfaceVariant">#33383E</item>
+        <item name="colorOnSurfaceVariant">#C2C8CE</item>
+        <item name="colorError">#FFB4AB</item>
+        <item name="colorOnError">#690005</item>
+        <item name="colorOutline">#8C959C</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 
-    <style name="Theme.BlueLight.Custom.Blue" parent="Theme.BlueLight.Custom">
-        <item name="colorPrimary">#2862C9</item>
-        <item name="colorOnPrimary">#FFFFFF</item>
-        <item name="colorPrimaryContainer">#C7DBFF</item>
-        <item name="colorOnPrimaryContainer">#001B3C</item>
-        <item name="colorSecondary">#4A6572</item>
-        <item name="colorOnSecondary">#FFFFFF</item>
-        <item name="colorSecondaryContainer">#CDE4EC</item>
-        <item name="colorOnSecondaryContainer">#051F27</item>
-        <item name="colorTertiary">#5B5B92</item>
-        <item name="colorOnTertiary">#FFFFFF</item>
-        <item name="colorTertiaryContainer">#E1DEFF</item>
-        <item name="colorOnTertiaryContainer">#171734</item>
-        <item name="colorOutline">#71787F</item>
-    </style>
-
-    <style name="Theme.BlueLight.Custom.Green" parent="Theme.BlueLight.Custom">
+    <!-- ============================================================= -->
+    <!-- Accent overlays: applied via Theme.applyStyle() AFTER          -->
+    <!-- setTheme(), so the accent works with ANY theme (light/dark/   -->
+    <!-- gray). This replaces the old per-accent "custom" themes.      -->
+    <!-- ============================================================= -->
+    <style name="OverlayAccent.Green" parent="">
         <item name="colorPrimary">#2E7D32</item>
         <item name="colorOnPrimary">#FFFFFF</item>
         <item name="colorPrimaryContainer">#B6F09C</item>
         <item name="colorOnPrimaryContainer">#00210A</item>
-        <item name="colorSecondary">#4F6351</item>
-        <item name="colorOnSecondary">#FFFFFF</item>
-        <item name="colorSecondaryContainer">#D2E8D6</item>
-        <item name="colorOnSecondaryContainer">#0C1F13</item>
-        <item name="colorTertiary">#386A64</item>
-        <item name="colorOnTertiary">#FFFFFF</item>
-        <item name="colorTertiaryContainer">#BCEDEC</item>
-        <item name="colorOnTertiaryContainer">#00201D</item>
-        <item name="colorOutline">#72787A</item>
     </style>
 
-    <style name="Theme.BlueLight.Custom.Purple" parent="Theme.BlueLight.Custom">
+    <style name="OverlayAccent.Purple" parent="">
         <item name="colorPrimary">#6750A4</item>
         <item name="colorOnPrimary">#FFFFFF</item>
         <item name="colorPrimaryContainer">#EADDFF</item>
         <item name="colorOnPrimaryContainer">#21005D</item>
-        <item name="colorSecondary">#625B71</item>
-        <item name="colorOnSecondary">#FFFFFF</item>
-        <item name="colorSecondaryContainer">#E8DEF8</item>
-        <item name="colorOnSecondaryContainer">#1D192B</item>
-        <item name="colorTertiary">#7D5260</item>
-        <item name="colorOnTertiary">#FFFFFF</item>
-        <item name="colorTertiaryContainer">#FFD8E4</item>
-        <item name="colorOnTertiaryContainer">#31111D</item>
-        <item name="colorOutline">#79747E</item>
     </style>
 
-    <style name="Theme.BlueLight.Custom.Amber" parent="Theme.BlueLight.Custom">
+    <style name="OverlayAccent.Amber" parent="">
         <item name="colorPrimary">#C77800</item>
         <item name="colorOnPrimary">#000000</item>
         <item name="colorPrimaryContainer">#FFDCAB</item>
         <item name="colorOnPrimaryContainer">#3A1E00</item>
-        <item name="colorSecondary">#6E5A4B</item>
-        <item name="colorOnSecondary">#FFFFFF</item>
-        <item name="colorSecondaryContainer">#F8DFD0</item>
-        <item name="colorOnSecondaryContainer">#28180F</item>
-        <item name="colorTertiary">#6F5C2E</item>
-        <item name="colorOnTertiary">#FFFFFF</item>
-        <item name="colorTertiaryContainer">#F7E1A8</item>
-        <item name="colorOnTertiaryContainer">#231B00</item>
-        <item name="colorOutline">#7C736A</item>
     </style>
 
-    <style name="Theme.BlueLight.Custom.Teal" parent="Theme.BlueLight.Custom">
+    <style name="OverlayAccent.Teal" parent="">
         <item name="colorPrimary">#00695C</item>
         <item name="colorOnPrimary">#FFFFFF</item>
         <item name="colorPrimaryContainer">#6FF0DC</item>
         <item name="colorOnPrimaryContainer">#002019</item>
-        <item name="colorSecondary">#4A6360</item>
-        <item name="colorOnSecondary">#FFFFFF</item>
-        <item name="colorSecondaryContainer">#CDE8E4</item>
-        <item name="colorOnSecondaryContainer">#051F1C</item>
-        <item name="colorTertiary">#4A6079</item>
-        <item name="colorOnTertiary">#FFFFFF</item>
-        <item name="colorTertiaryContainer">#D2E4FF</item>
-        <item name="colorOnTertiaryContainer">#031E36</item>
-        <item name="colorOutline">#6E7776</item>
+    </style>
+
+    <!-- Deep blue theme: dark navy backdrop with a bright blue accent -->
+    <style name="Theme.BlueLight.DeepBlue" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">#5B9DFF</item>
+        <item name="colorOnPrimary">#002B5C</item>
+        <item name="colorPrimaryContainer">#0B3F7A</item>
+        <item name="colorOnPrimaryContainer">#CFE4FF</item>
+        <item name="colorSecondary">#5C7EA8</item>
+        <item name="colorOnSecondary">#00223F</item>
+        <item name="colorSecondaryContainer">#153A5E</item>
+        <item name="colorOnSecondaryContainer">#CFE4FF</item>
+        <item name="colorTertiary">#7AA2FF</item>
+        <item name="colorOnTertiary">#00265C</item>
+        <item name="colorTertiaryContainer">#21427A</item>
+        <item name="colorOnTertiaryContainer">#D6E3FF</item>
+        <item name="android:colorBackground">#0C1424</item>
+        <item name="colorSurface">#101B2E</item>
+        <item name="colorOnSurface">#DEE7F5</item>
+        <item name="colorSurfaceVariant">#1E3050</item>
+        <item name="colorOnSurfaceVariant">#BFCBDE</item>
+        <item name="colorError">#FFB4AB</item>
+        <item name="colorOnError">#690005</item>
+        <item name="colorOutline">#8C9BB4</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
     </style>
 </resources>

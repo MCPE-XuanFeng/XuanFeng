@@ -8,7 +8,7 @@ android {
     buildToolsVersion '36.0.0'
 
     defaultConfig {
-        applicationId "com.haniokasai.app.pmmp_srv"
+        applicationId "com.haniokasai.app.pmmp_srv_xf"
         minSdk 21
         // Deliberately 28 (Termux approach): Android 10+ SELinux W^X blocks
         // exec() of app-data binaries for targetSdk >= 29, which would make

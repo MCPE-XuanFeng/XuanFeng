@@ -1,12 +1,8 @@
 package com.haniokasai.app.pmmp_srv;
 
-import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.RenderEffect;
-import android.graphics.Shader;
 import android.net.Uri;
-import android.os.Build;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -41,10 +37,10 @@ public final class UiUtils {
         WindowCompat.setDecorFitsSystemWindows(activity.getWindow(), false);
 
         // Pick light (dark icons) vs dark (light icons) status/nav bar glyphs
-        // based on the current night mode so they stay legible over the glass.
-        int night = activity.getResources().getConfiguration().uiMode
-                & Configuration.UI_MODE_NIGHT_MASK;
-        boolean isNight = (night == Configuration.UI_MODE_NIGHT_YES);
+        // from the THEME PREFERENCE (not the system night mode): in the light
+        // and gray themes the bars sit on a bright backdrop, so icons must be
+        // dark/black; only the dark theme gets white icons.
+        boolean isNight = "dark".equals(AppSettings.theme(activity));
         WindowInsetsControllerCompat controller = WindowCompat.getInsetsController(
                 activity.getWindow(), activity.getWindow().getDecorView());
         controller.setAppearanceLightStatusBars(!isNight);
@@ -60,7 +56,64 @@ public final class UiUtils {
         });
     }
 
-    /** Load the chosen background into the backdrop ImageView and frost it on API 31+. */
+    /**
+     * Backdrop policy (saves GPU/CPU):
+     *  - No custom wallpaper selected: a SOLID color taken from the current
+     *    theme's android:colorBackground — so a light theme gets a white
+     *    backdrop, a dark theme a black one, and the gray theme a gray one.
+     *    No image decoding, no blur — the cheapest possible option.
+     *  - Custom wallpaper selected: show the image as-is, WITHOUT blur
+     *    (RenderEffect blur on every frame is expensive on low-end devices).
+     */
+    /**
+     * Tints every menu icon with the theme's colorOnSurface.
+     *
+     * The bundled toolbar icons (console, copy, clear) are plain white PNGs,
+     * which are invisible on the light/gray themes' bright toolbar. This makes
+     * them black in light/gray themes and white in the dark theme.
+     */
+    public static void tintMenuIcons(AppCompatActivity activity, android.view.Menu menu) {
+        android.util.TypedValue tv = new android.util.TypedValue();
+        if (!activity.getTheme().resolveAttribute(
+                com.google.android.material.R.attr.colorOnSurface, tv, true)) {
+            return;
+        }
+        int color = tv.data;
+        for (int i = 0; i < menu.size(); i++) {
+            android.view.MenuItem item = menu.getItem(i);
+            if (item.getIcon() != null) {
+                item.getIcon().mutate();
+                item.getIcon().setColorFilter(color, android.graphics.PorterDuff.Mode.SRC_IN);
+            }
+        }
+    }
+
+    /**
+     * Decodes the wallpaper down to roughly the screen size.
+     *
+     * Full-resolution phone photos (12+ MP) cost ~48 MB of RAM each and force
+     * the GPU to scale them every frame; downsampling keeps the backdrop
+     * crisp while using a fraction of the memory.
+     */
+    private static Bitmap decodeSampled(android.app.Activity activity, InputStream is) {
+        android.graphics.BitmapFactory.Options bounds =
+                new android.graphics.BitmapFactory.Options();
+        bounds.inJustDecodeBounds = true;
+        android.graphics.BitmapFactory.decodeStream(is, null, bounds);
+        int maxSide = Math.max(
+                activity.getResources().getDisplayMetrics().widthPixels,
+                activity.getResources().getDisplayMetrics().heightPixels);
+        int sample = 1;
+        int larger = Math.max(bounds.outWidth, bounds.outHeight);
+        while (larger / (sample * 2) > maxSide) {
+            sample *= 2;
+        }
+        android.graphics.BitmapFactory.Options opts =
+                new android.graphics.BitmapFactory.Options();
+        opts.inSampleSize = sample;
+        return android.graphics.BitmapFactory.decodeStream(is, null, opts);
+    }
+
     public static void applyGlassBackdrop(AppCompatActivity activity, ImageView backdrop) {
         if (backdrop == null) {
             return;
@@ -71,39 +124,25 @@ public final class UiUtils {
             try {
                 Uri uri = Uri.parse(uriStr);
                 try (InputStream is = activity.getContentResolver().openInputStream(uri)) {
-                    Bitmap bitmap = BitmapFactory.decodeStream(is);
+                    Bitmap bitmap = decodeSampled(activity, is);
                     if (bitmap != null) {
                         backdrop.setImageBitmap(bitmap);
                         loaded = true;
                     }
                 }
             } catch (Exception e) {
-                // fall back to default below
+                // fall back to theme color below
             }
         }
         if (!loaded) {
-            backdrop.setImageResource(defaultBackdropResource(activity));
+            backdrop.setImageDrawable(null);
+            // Follow the active theme (light → white, dark → black, gray → gray).
+            android.util.TypedValue tv = new android.util.TypedValue();
+            if (activity.getTheme().resolveAttribute(android.R.attr.colorBackground, tv, true)) {
+                backdrop.setBackgroundColor(tv.data);
+            } else {
+                backdrop.setBackgroundColor(android.graphics.Color.BLACK);
+            }
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            backdrop.setRenderEffect(
-                    RenderEffect.createBlurEffect(26f, 26f, Shader.TileMode.CLAMP));
-        }
-    }
-
-    /**
-     * Picks the built-in backdrop that matches the current orientation.
-     *
-     * The two defaults have very different aspect ratios (landscape 1280x720 vs
-     * portrait 1080x1920); the ImageView uses centerCrop, so showing the
-     * landscape one in portrait crops away most of the image. "auto" follows
-     * the sensor, so the live window orientation is the right signal there.
-     */
-    private static int defaultBackdropResource(AppCompatActivity activity) {
-        int orientation = activity.getResources().getConfiguration().orientation;
-        if (orientation == Configuration.ORIENTATION_PORTRAIT) {
-            return R.drawable.default_bg_portrait;
-        }
-        return R.drawable.default_bg;
     }
 }

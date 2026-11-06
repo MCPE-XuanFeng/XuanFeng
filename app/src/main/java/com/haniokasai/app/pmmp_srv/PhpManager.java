@@ -531,8 +531,7 @@ public class PhpManager {
         makeExecutableDir(appPhp.getParentFile());
 
         String r1 = testPhp(appPhp);
-        ConsoleActivity.log("[PE Server] php probe (app dir): "
-                + (r1.startsWith("ERROR:") ? r1 : "OK - " + r1));
+        ConsoleActivity.log(R.string.log_php_probe, "app", r1.startsWith("ERROR:") ? r1 : "OK - " + r1);
         if (!r1.startsWith("ERROR:")) {
             return appPhp.getAbsolutePath();
         }
@@ -544,8 +543,7 @@ public class PhpManager {
             makeExecutable(filesPhp);
             makeExecutableDir(filesPhp.getParentFile());
             String r2 = testPhp(filesPhp);
-            ConsoleActivity.log("[PE Server] php probe (files dir): "
-                    + (r2.startsWith("ERROR:") ? r2 : "OK - " + r2));
+            ConsoleActivity.log(R.string.log_php_probe, "files", r2.startsWith("ERROR:") ? r2 : "OK - " + r2);
             if (!r2.startsWith("ERROR:")) {
                 return filesPhp.getAbsolutePath();
             }
@@ -560,8 +558,7 @@ public class PhpManager {
             copyFile(appPhp, fallback);
             makeExecutable(fallback);
             String r3 = testPhp(fallback);
-            ConsoleActivity.log("[PE Server] php probe (/data/local/tmp): "
-                    + (r3.startsWith("ERROR:") ? r3 : "OK - " + r3));
+            ConsoleActivity.log(R.string.log_php_probe, "/data/local/tmp", r3.startsWith("ERROR:") ? r3 : "OK - " + r3);
             if (!r3.startsWith("ERROR:")) {
                 return fallback.getAbsolutePath();
             }

@@ -7,9 +7,14 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
-    <!-- Needed on Android 10 and below to write to the shared external storage root. -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
-        android:maxSdkVersion="29" />
+    <!-- Storage permissions are declared WITHOUT maxSdkVersion (and with the
+         Android 13+ media ones) so they actually show up in the system app
+         permission list, where the user can grant them. -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
 
     <!-- Android 11+ requires this to use /storage/emulated/0/PocketMine. -->
     <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE"
@@ -28,8 +33,7 @@
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:screenOrientation="landscape"
-            android:configChanges="keyboardHidden|orientation|screenSize"
+           
             android:label="@string/activity_main">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -40,20 +44,16 @@
         <activity
             android:name=".ConsoleActivity"
             android:exported="false"
-            android:screenOrientation="landscape"
-            android:configChanges="keyboardHidden|orientation|screenSize"
             android:label="@string/activity_console" />
 
         <activity
             android:name=".InstallPhpActivity"
             android:exported="false"
-            android:screenOrientation="landscape"
             android:label="@string/title_install_php" />
 
         <activity
             android:name=".FrpActivity"
             android:exported="false"
-            android:screenOrientation="landscape"
             android:label="@string/title_frp" />
 
         <service

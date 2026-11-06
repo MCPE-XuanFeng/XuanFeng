@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Portrait variant: the log fills the top, the command input docks at the
+     bottom (thumb-friendly) instead of the landscape side-by-side split. -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Backdrop (pure black by default; custom wallpaper via UiUtils) -->
+    <ImageView
+        android:id="@+id/glassBackdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null" />
+
+    <!-- Glass content layer -->
+    <LinearLayout
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/glass_toolbar"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:title="@string/activity_console"
+            app:titleTextColor="?attr/colorOnSurface" />
+
+        <!-- Log: fills all remaining space -->
+        <ScrollView
+            android:id="@+id/logScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:padding="8dp">
+
+            <TextView
+                android:id="@+id/label_log"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/glass_console_bg"
+                android:padding="10dp"
+                android:textColor="?attr/colorOnSurface"
+                android:textIsSelectable="true" />
+        </ScrollView>
+
+        <!-- Command input docked at the bottom (no enclosing card frame) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:padding="4dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <!-- input row -->
+
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/ConsoleInput"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:hint="@string/button_send">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/edit_command"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:imeOptions="actionSend"
+                        android:inputType="text"
+                        android:maxLines="1" />
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/button_send"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="@string/button_send" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

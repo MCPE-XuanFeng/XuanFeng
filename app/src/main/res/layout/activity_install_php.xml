@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/default_bg"
         android:contentDescription="@null" />
 
     <!-- Glass content layer -->
@@ -68,7 +67,7 @@
                                 style="@style/TextAppearance.Material3.TitleMedium"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="@string/php_current" />
+                                android:text="@string/php_status_label" />
 
                             <TextView
                                 android:id="@+id/text_php_status"

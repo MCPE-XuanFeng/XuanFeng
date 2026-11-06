@@ -55,11 +55,14 @@ public final class AppSettings {
     }
 
     public static String theme(Context c) {
-        return prefs(c).getString(KEY_THEME, "light");
+        String v = prefs(c).getString(KEY_THEME, "gray");
+        if ("dark".equals(v) || "light".equals(v) || "deepblue".equals(v)) return v;
+        return "gray"; // "gray" is the default; old "custom" falls back to gray
     }
 
     public static String accent(Context c) {
-        return prefs(c).getString(KEY_ACCENT, "blue");
+        String v = prefs(c).getString(KEY_ACCENT, "");
+        return v == null ? "" : v;
     }
 
     /** Custom background image URI; empty means use the built-in default. */
@@ -127,17 +130,12 @@ public final class AppSettings {
         prefs(c).edit().putString(KEY_ORIENTATION, value).apply();
     }
 
-    /** Maps the stored preference to an ActivityInfo.SCREREEN_ORIENTATION_* value. */
+    /**
+     * The app is portrait-only now: the orientation preference was removed and
+     * every activity is forced to SCREEN_ORIENTATION_PORTRAIT.
+     */
     public static int orientationConstant(Context c) {
-        switch (orientation(c)) {
-            case "portrait":
-                return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
-            case "auto":
-                return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-            case "landscape":
-            default:
-                return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
-        }
+        return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
     }
 
     /**
@@ -261,27 +259,52 @@ public final class AppSettings {
                 return AppCompatDelegate.MODE_NIGHT_YES;
             case "light":
                 return AppCompatDelegate.MODE_NIGHT_NO;
-            default: // custom follows the system
-                return AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM;
+            case "gray":
+                return AppCompatDelegate.MODE_NIGHT_YES; // deep gray is dark
+            case "deepblue":
+                return AppCompatDelegate.MODE_NIGHT_YES;
+            default:
+                return AppCompatDelegate.MODE_NIGHT_NO;
         }
     }
 
     /** Theme resource id to apply in onCreate(), before setContentView. */
     public static int themeRes(Context c) {
-        if (!"custom".equals(theme(c))) {
-            return R.style.Theme_BlueLight;
+        switch (theme(c)) {
+            case "gray":
+                return R.style.Theme_BlueLight_Gray;
+            case "deepblue":
+                return R.style.Theme_BlueLight_DeepBlue;
+            default: // light + dark share the DayNight theme (night mode picks)
+                return R.style.Theme_BlueLight;
         }
+    }
+
+    /**
+     * Accent-color overlay style for the stored accent preference.
+     *
+     * The accent is applied as a ThemeOverlay via Theme.applyStyle() AFTER
+     * setTheme(), so the user can change the accent independently of the
+     * theme (previously the accent only took effect with the now-removed
+     * "custom" theme, which is why it seemed impossible to set).
+     */
+    public static int accentOverlayRes(Context c) {
         switch (accent(c)) {
-            case "green":
-                return R.style.Theme_BlueLight_Custom_Green;
-            case "purple":
-                return R.style.Theme_BlueLight_Custom_Purple;
-            case "amber":
-                return R.style.Theme_BlueLight_Custom_Amber;
-            case "teal":
-                return R.style.Theme_BlueLight_Custom_Teal;
-            default:
-                return R.style.Theme_BlueLight_Custom_Blue;
+            case "green":  return R.style.OverlayAccent_Green;
+            case "purple": return R.style.OverlayAccent_Purple;
+            case "amber":  return R.style.OverlayAccent_Amber;
+            case "teal":   return R.style.OverlayAccent_Teal;
+            case "blue":   return 0; // blue == the original theme default, no overlay
+            default:       return 0; // theme default
+        }
+    }
+
+    /** setTheme() + accent overlay, shared by every activity. */
+    public static void applyTheme(android.app.Activity a) {
+        a.setTheme(themeRes(a));
+        int overlay = accentOverlayRes(a);
+        if (overlay != 0) {
+            a.getTheme().applyStyle(overlay, true);
         }
     }
 

@@ -27,5 +27,5 @@
     <color name="glass_card">#B3FFFFFF</color>        <!-- ~70% white -->
     <color name="glass_toolbar">#99FFFFFF</color>     <!-- ~60% white -->
     <color name="glass_console_bg">#CCFFFFFF</color>  <!-- ~80% white -->
-    <color name="glass_stroke">#33FFFFFF</color>      <!-- 20% white edge highlight -->
+    <color name="glass_stroke">#66000000</color>      <!-- 40% black edge: visible on white -->
 </resources>

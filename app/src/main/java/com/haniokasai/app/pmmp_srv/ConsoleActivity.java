@@ -4,6 +4,8 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.view.KeyEvent;
@@ -43,9 +45,11 @@ public class ConsoleActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppSettings.nightMode(this));
-        setTheme(AppSettings.themeRes(this));
-        super.onCreate(savedInstanceState);
+        AppSettings.applyTheme(this);
+        // Apply the saved orientation BEFORE super.onCreate so the very
+        // first frame already uses the right direction (no landscape flash).
         AppSettings.applyOrientation(this);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_console);
         UiUtils.setupEdgeToEdge(this, findViewById(R.id.root));
         UiUtils.applyGlassBackdrop(this, (ImageView) findViewById(R.id.glassBackdrop));
@@ -69,6 +73,7 @@ public class ConsoleActivity extends AppCompatActivity {
             // Opening the console should land on the newest line.
             applyScrollOnNextDraw(true, 0);
         }
+
 
         edit_command.setOnKeyListener((p1, keyCode, p3) -> {
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -107,7 +112,53 @@ public class ConsoleActivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.console_menu, menu);
+        UiUtils.tintMenuIcons(this, menu);
         return true;
+    }
+
+    /** Max kept log characters: the buffer is trimmed from the oldest end. */
+    private static final int MAX_LOG_CHARS = 200000;
+
+    /** Pending output waiting to be pushed into the TextView. */
+    private static final SpannableStringBuilder pendingUi = new SpannableStringBuilder();
+    private static final Object PENDING_LOCK = new Object();
+    private static final Handler MAIN_HANDLER = new Handler(Looper.getMainLooper());
+    private static boolean flushScheduled = false;
+
+    /**
+     * Flushes buffered console output to the TextView at most once every
+     * FLUSH_MS. A busy server can emit hundreds of lines per second; appending
+     * and re-measuring the text for every single one was the main UI
+     * bottleneck (constant relayout + scroll churn).
+     */
+    private static final long FLUSH_MS = 120L;
+
+    private static final Runnable FLUSH_RUNNABLE = new Runnable() {
+        @Override
+        public void run() {
+            CharSequence chunk;
+            synchronized (PENDING_LOCK) {
+                chunk = pendingUi.subSequence(0, pendingUi.length());
+                pendingUi.clear();
+                flushScheduled = false;
+            }
+            if (label_log == null) {
+                return;
+            }
+            followNewOutput(chunk);
+        }
+    };
+
+    /**
+     * Logs a localized message: resolves the string resource with the
+     * application context (which follows the in-app language) and optional
+     * format arguments, so console diagnostics can be translated too.
+     */
+    public static void log(int resId, Object... args) {
+        android.content.Context c = AppSettings.AppHolder.ctx;
+        if (c == null && instance != null) c = instance.getApplicationContext();
+        if (c == null) return;
+        log(c.getString(resId, args));
     }
 
     public static void log(String line) {
@@ -142,10 +193,34 @@ public class ConsoleActivity extends AppCompatActivity {
 
             line = line + "</font><br />";
         }
-        final CharSequence result = MainActivity.ansiMode ? Html.fromHtml(line) : (line + "\n");
+        // In ANSI mode Html.fromHtml() collapses an empty message to nothing,
+        // so a blank line would not push the view down. Keep it as a newline:
+        // every message - even an empty one - must advance the scroll.
+        CharSequence result = MainActivity.ansiMode ? Html.fromHtml(line) : (line + "\n");
+        if (result == null || result.length() == 0) {
+            result = "\n";
+        }
         currentLog.append(result);
-        if (instance != null) {
-            instance.runOnUiThread(() -> followNewOutput(result));
+        // Keep the buffer bounded so a long session cannot eat all the memory.
+        if (currentLog.length() > MAX_LOG_CHARS) {
+            int cut = currentLog.length() - MAX_LOG_CHARS;
+            currentLog.delete(0, cut);
+            // The view is rebuilt from currentLog on the next flush.
+            synchronized (PENDING_LOCK) {
+                pendingUi.clear();
+            }
+            if (instance != null) {
+                instance.runOnUiThread(() -> {
+                    if (label_log != null) label_log.setText(currentLog);
+                });
+            }
+        }
+        synchronized (PENDING_LOCK) {
+            pendingUi.append(result);
+            if (!flushScheduled) {
+                flushScheduled = true;
+                MAIN_HANDLER.postDelayed(FLUSH_RUNNABLE, FLUSH_MS);
+            }
         }
     }
 
@@ -207,10 +282,26 @@ public class ConsoleActivity extends AppCompatActivity {
     }
 
     private static void settleScroll(ScrollView sv, boolean follow, int keepY) {
-        if (follow) {
-            sv.fullScroll(ScrollView.FOCUS_DOWN);
-        } else {
+        if (!follow) {
             sv.scrollTo(0, keepY);
+            return;
         }
+        // Hard-jump to the bottom (no smooth animation: it gets interrupted by
+        // the next burst of output and then stops halfway).
+        scrollToBottom(sv);
+        // Appending to a selectable TextView triggers a second relayout
+        // (text measurement + selection anchor), so settle once more after it.
+        sv.post(() -> scrollToBottom(sv));
+    }
+
+    /** Puts the log scroll at the very bottom of its content. */
+    private static void scrollToBottom(ScrollView sv) {
+        View child = sv.getChildAt(0);
+        if (child == null) {
+            sv.fullScroll(ScrollView.FOCUS_DOWN);
+            return;
+        }
+        int bottom = Math.max(0, child.getBottom() - sv.getHeight() + sv.getPaddingBottom());
+        sv.scrollTo(0, bottom);
     }
 }

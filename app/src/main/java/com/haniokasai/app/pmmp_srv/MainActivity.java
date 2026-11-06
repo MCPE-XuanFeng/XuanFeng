@@ -109,14 +109,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         AppCompatDelegate.setDefaultNightMode(AppSettings.nightMode(this));
-        setTheme(AppSettings.themeRes(this));
-        super.onCreate(savedInstanceState);
+        AppSettings.applyTheme(this);
+        // Apply the saved orientation BEFORE super.onCreate so the very
+        // first frame already uses the right direction (no landscape flash).
         AppSettings.applyOrientation(this);
+        super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         UiUtils.setupEdgeToEdge(this, findViewById(R.id.root));
         UiUtils.applyGlassBackdrop(this, (ImageView) findViewById(R.id.glassBackdrop));
 
-        ensureAllFilesAccess();
+        ensureStoragePermission();
 
         Toolbar toolbar = findViewById(R.id.topAppBar);
         setSupportActionBar(toolbar);
@@ -151,6 +153,10 @@ public class MainActivity extends AppCompatActivity {
         });
 
         button_start.setOnClickListener(v -> {
+            if (!ServerUtils.hasSharedStorageAccess()) {
+                toast(R.string.storage_missing_hint);
+                openAllFilesAccessSettings();
+            }
             isStarted = true;
             refreshEnabled();
             // Hand the whole server lifecycle to the foreground service so the
@@ -169,6 +175,21 @@ public class MainActivity extends AppCompatActivity {
         // Auto-install the bundled PHP 7.x binary + busybox on first launch.
         if (!ServerUtils.isPhpInstalled()) {
             autoInstallBundledPhp();
+        }
+    }
+
+    /**
+     * Refresh the PHP status every time the activity comes back to the
+     * foreground: after installing another PHP build in InstallPhpActivity the
+     * main screen used to keep showing the previously installed version
+     * (e.g. the auto-installed 8.0.28).
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (text_php_status != null) {
+            updatePhpStatus();
+            refreshEnabled();
         }
     }
 
@@ -366,6 +387,7 @@ public class MainActivity extends AppCompatActivity {
         menu_twitter = menu.findItem(R.id.menu_twitter);
         menu_bl_twitter = menu.findItem(R.id.menu_bl_twitter);
         menu_help = menu.findItem(R.id.menu_help);
+        UiUtils.tintMenuIcons(this, menu);
         return true;
     }
 
@@ -475,18 +497,20 @@ public class MainActivity extends AppCompatActivity {
         RadioGroup rgLang = view.findViewById(R.id.rg_lang);
         RadioGroup rgTheme = view.findViewById(R.id.rg_theme);
         RadioGroup rgAccent = view.findViewById(R.id.rg_accent);
-        RadioGroup rgOrientation = view.findViewById(R.id.rg_orientation);
 
-        switch (AppSettings.orientation(this)) {
-            case "portrait":
-                rgOrientation.check(R.id.rb_orientation_portrait);
+        switch (AppSettings.theme(this)) {
+            case "dark":
+                rgTheme.check(R.id.rb_theme_dark);
                 break;
-            case "auto":
-                rgOrientation.check(R.id.rb_orientation_auto);
+            case "light":
+                rgTheme.check(R.id.rb_theme_light);
                 break;
-            case "landscape":
+            case "deepblue":
+                rgTheme.check(R.id.rb_theme_deepblue);
+                break;
+            case "gray":
             default:
-                rgOrientation.check(R.id.rb_orientation_landscape);
+                rgTheme.check(R.id.rb_theme_gray);
                 break;
         }
 
@@ -495,28 +519,13 @@ public class MainActivity extends AppCompatActivity {
         else if ("zh".equals(lang)) rgLang.check(R.id.rb_lang_zh);
         else rgLang.check(R.id.rb_lang_en);
 
-        String theme = AppSettings.theme(this);
-        if ("dark".equals(theme)) rgTheme.check(R.id.rb_theme_dark);
-        else if ("custom".equals(theme)) rgTheme.check(R.id.rb_theme_custom);
-        else rgTheme.check(R.id.rb_theme_light);
-
-        switch (AppSettings.accent(this)) {
-            case "green":
-                rgAccent.check(R.id.rb_accent_green);
-                break;
-            case "purple":
-                rgAccent.check(R.id.rb_accent_purple);
-                break;
-            case "amber":
-                rgAccent.check(R.id.rb_accent_amber);
-                break;
-            case "teal":
-                rgAccent.check(R.id.rb_accent_teal);
-                break;
-            default:
-                rgAccent.check(R.id.rb_accent_blue);
-                break;
-        }
+        String accent = AppSettings.accent(this);
+        if ("green".equals(accent)) rgAccent.check(R.id.rb_accent_green);
+        else if ("purple".equals(accent)) rgAccent.check(R.id.rb_accent_purple);
+        else if ("amber".equals(accent)) rgAccent.check(R.id.rb_accent_amber);
+        else if ("teal".equals(accent)) rgAccent.check(R.id.rb_accent_teal);
+        else if ("blue".equals(accent)) rgAccent.check(R.id.rb_accent_blue);
+        // "" / unknown -> none checked, the accent stays with the theme default
 
         MaterialCheckBox checkPty = view.findViewById(R.id.check_pty_console);
         checkPty.setChecked(AppSettings.ptyConsole(this));
@@ -527,6 +536,7 @@ public class MainActivity extends AppCompatActivity {
         view.findViewById(R.id.button_change_bg).setOnClickListener(v -> {
             bgLauncher.launch(new String[]{"image/*"});
         });
+        view.findViewById(R.id.button_grant_storage).setOnClickListener(v -> openAllFilesAccessSettings());
         view.findViewById(R.id.button_reset_bg).setOnClickListener(v -> {
             AppSettings.clearBackgroundUri(this);
             UiUtils.applyGlassBackdrop(this, (ImageView) findViewById(R.id.glassBackdrop));
@@ -539,14 +549,16 @@ public class MainActivity extends AppCompatActivity {
             if (lid == R.id.rb_lang_zh) newLang = "zh";
             else if (lid == R.id.rb_lang_en) newLang = "en";
 
-            String newTheme = "light";
+            String newTheme = "gray";
             int tid = rgTheme.getCheckedRadioButtonId();
             if (tid == R.id.rb_theme_dark) newTheme = "dark";
-            else if (tid == R.id.rb_theme_custom) newTheme = "custom";
+            else if (tid == R.id.rb_theme_light) newTheme = "light";
+            else if (tid == R.id.rb_theme_deepblue) newTheme = "deepblue";
 
-            String newAccent = "blue";
+            String newAccent = "";
             int aid = rgAccent.getCheckedRadioButtonId();
-            if (aid == R.id.rb_accent_green) newAccent = "green";
+            if (aid == R.id.rb_accent_blue) newAccent = "blue";
+            else if (aid == R.id.rb_accent_green) newAccent = "green";
             else if (aid == R.id.rb_accent_purple) newAccent = "purple";
             else if (aid == R.id.rb_accent_amber) newAccent = "amber";
             else if (aid == R.id.rb_accent_teal) newAccent = "teal";
@@ -555,12 +567,6 @@ public class MainActivity extends AppCompatActivity {
             ed.putString(AppSettings.KEY_LANG, newLang);
             ed.putString(AppSettings.KEY_THEME, newTheme);
             ed.putString(AppSettings.KEY_ACCENT, newAccent);
-
-            String newOrientation = "landscape";
-            int oid = rgOrientation.getCheckedRadioButtonId();
-            if (oid == R.id.rb_orientation_portrait) newOrientation = "portrait";
-            else if (oid == R.id.rb_orientation_auto) newOrientation = "auto";
-            ed.putString(AppSettings.KEY_ORIENTATION, newOrientation);
             ed.apply();
 
             boolean newPty = checkPty.isChecked();
@@ -586,50 +592,46 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Ensure the app can write to /storage/emulated/0/PocketMine.
+     * Request plain WRITE_EXTERNAL_STORAGE (a normal runtime permission) once.
      *
-     * - API >= 30: WRITE_EXTERNAL_STORAGE is scoped and can never reach an
-     *   arbitrary /PocketMine folder, so MANAGE_EXTERNAL_STORAGE (All files
-     *   access) is required. Open the system settings page for this package.
-     *   Without this check the old code requested WRITE_EXTERNAL_STORAGE on
-     *   every launch, which the OS never grants above API 29 — hence the
-     *   "repeatedly asks for permission" loop.
-     * - API 23..29: request WRITE_EXTERNAL_STORAGE at runtime (legacy storage).
+     * We deliberately do NOT ask for MANAGE_EXTERNAL_STORAGE ("All files
+     * access"): the app targets SDK 28 with requestLegacyExternalStorage, so
+     * a granted WRITE_EXTERNAL_STORAGE is enough to reach
+     * /storage/emulated/0/PocketMine on every Android version. No more
+     * scary "allow access to all files" prompt on launch.
      */
-    private void ensureAllFilesAccess() {
-        if (Build.VERSION.SDK_INT >= 30) {
-            if (!Environment.isExternalStorageManager()) {
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.storage_permission_title)
-                        .setMessage(R.string.storage_permission_message)
-                        .setPositiveButton(R.string.dialog_ok, (d, w) -> {
-                            Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
-                            intent.setData(Uri.parse("package:" + getPackageName()));
-                            try {
-                                startActivity(intent);
-                            } catch (Exception e) {
-                                toast(R.string.storage_permission_denied);
-                            }
-                        })
-                        .setNegativeButton(R.string.dialog_cancel, (d, w) ->
-                                toast(R.string.storage_permission_denied))
-                        .show();
+    /**
+     * Opens the system page where "All files access" can be granted for this
+     * app. On Android 11+ this is the only way to reach an arbitrary
+     * /storage/emulated/0/PocketMine folder, and the switch is not listed in
+     * the normal permission list on some devices - hence this shortcut.
+     */
+    private void openAllFilesAccessSettings() {
+        if (Build.VERSION.SDK_INT >= 30 && !Environment.isExternalStorageManager()) {
+            Intent intent = new Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            try {
+                startActivity(intent);
+                return;
+            } catch (Exception ignored) {
+                // fall through to the app-details page
             }
-            return;
         }
+        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        intent.setData(Uri.parse("package:" + getPackageName()));
+        try {
+            startActivity(intent);
+        } catch (Exception e) {
+            toast(R.string.storage_permission_denied);
+        }
+    }
+
+    private void ensureStoragePermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
                 && checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 != android.content.pm.PackageManager.PERMISSION_GRANTED) {
-            new AlertDialog.Builder(this)
-                    .setTitle(R.string.storage_permission_title)
-                    .setMessage(R.string.storage_permission_message)
-                    .setPositiveButton(R.string.dialog_ok, (d, w) ->
-                            requestPermissions(new String[]{
-                                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1001))
-                    .setNegativeButton(R.string.dialog_cancel, (d, w) ->
-                            toast(R.string.storage_permission_denied))
-                    .setCancelable(false)
-                    .show();
+            requestPermissions(new String[]{
+                    android.Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1001);
         }
     }
 

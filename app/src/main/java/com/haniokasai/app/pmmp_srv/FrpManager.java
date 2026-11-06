@@ -132,7 +132,7 @@ public final class FrpManager {
 
     public static void start(Context c) {
         if (frpProcess != null && isAlive(frpProcess)) {
-            ConsoleActivity.log("[frp] Already running; not starting a second instance.");
+            ConsoleActivity.log(R.string.log_frp_already);
             return;
         }
         try {
@@ -146,22 +146,22 @@ public final class FrpManager {
             try {
                 frpProcess = pb.start();
             } catch (Exception e) {
-                ConsoleActivity.log("[frp] Failed to start frpc: " + e.getMessage());
+                ConsoleActivity.log(R.string.log_frp_start_failed, String.valueOf(e.getMessage()));
                 return;
             }
             frpStdin = frpProcess.getOutputStream();
-            ConsoleActivity.log("[frp] frpc started (config: " + cfg.getAbsolutePath() + ")");
+            ConsoleActivity.log(R.string.log_frp_started, cfg.getAbsolutePath());
             Thread t = new Thread(FrpManager::monitor);
             t.setName("frp-monitor");
             t.start();
         } catch (Exception e) {
-            ConsoleActivity.log("[frp] Could not start frpc: " + e.getMessage());
+            ConsoleActivity.log(R.string.log_frp_could_not, String.valueOf(e.getMessage()));
         }
     }
 
     public static void stop() {
         if (frpProcess == null) return;
-        ConsoleActivity.log("[frp] Stopping frpc…");
+        ConsoleActivity.log(R.string.log_frp_stopping);
         try {
             if (frpStdin != null) {
                 frpStdin.write("quit\n".getBytes(StandardCharsets.UTF_8));
@@ -198,7 +198,7 @@ public final class FrpManager {
             }
         } catch (Exception ignored) {
         } finally {
-            ConsoleActivity.log("[frp] frpc process exited.");
+            ConsoleActivity.log(R.string.log_frp_exited);
         }
     }
 

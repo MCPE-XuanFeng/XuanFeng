@@ -41,6 +41,8 @@
     <string name="storage_permission_title">需要所有文件访问权限</string>
     <string name="storage_permission_message">要使用 /storage/emulated/0/PocketMine，请在下一屏为 XuanFeng 开启「所有文件访问权限」。</string>
     <string name="storage_permission_denied">未授予所有文件访问权限。服务器数据将回退到应用私有目录。</string>
+    <string name="storage_grant_button">授予存储访问权限</string>
+    <string name="storage_missing_hint">无法访问 /storage/emulated/0。请到 系统设置 > 应用 > 本应用 > 权限 中开启「所有文件访问权限」，然后重新启动服务器。</string>
 
     <string name="menu_console">控制台</string>
     <string name="menu_kill">强制结束服务器</string>
@@ -88,6 +90,7 @@
     <string name="php_extracting">正在解压 PHP 二进制…</string>
     <string name="php_current">当前 PHP：%s</string>
     <string name="php_none">未安装</string>
+    <string name="php_status_label">PHP 状态</string>
     <string name="php_bundled_arch_warning">内置 PHP 7.x 为 arm64 构建，仅可在 arm64 设备上运行（本机：%1$s）。建议使用 pmmp 的 PHP 8.x 构建。</string>
     <string name="php_incompatible">已安装但无法运行：架构不匹配（二进制 %1$s，设备 %2$s）。请通过「Install PHP」安装 PHP 8.x（arm64）。</string>
     <string name="php_run_failed">已安装但执行失败：%1$s</string>
@@ -115,6 +118,9 @@
     <string name="accent_purple">紫色</string>
     <string name="accent_amber">琥珀色</string>
     <string name="accent_teal">青色</string>
+    <string name="accent_gray">灰色</string>
+    <string name="theme_gray">灰色</string>
+    <string name="theme_deepblue">深蓝色</string>
     <string name="settings_orientation">屏幕方向</string>
     <string name="orientation_landscape">横屏</string>
     <string name="orientation_portrait">竖屏</string>
@@ -155,4 +161,44 @@
     <string name="frp_installed_status">已安装：%s</string>
     <string name="frp_status_title">frpc 状态</string>
     <string name="frp_addr_required">启用穿透前请先填写 frp 服务器地址。</string>
+
+    <!-- 控制台诊断信息（中文） -->
+    <string name="log_server_already_running">[服务器] 已在运行，忽略重复启动请求。</string>
+    <string name="log_php_missing">[服务器] 缺少 php 二进制，请通过「安装 PHP」安装。</string>
+    <string name="log_using_php">[服务器] 使用 php：%s</string>
+    <string name="log_entry_detected">[服务器] 检测到服务器入口文件：%s</string>
+    <string name="log_no_storage_access">[服务器] 无法访问 /storage/emulated/0（Android 11+ 需要「所有文件访问」）。请到 设置 > 应用 > 本应用 > 权限 中开启，或使用设置里的「授予存储访问权限」按钮。</string>
+    <string name="log_entry_missing">[服务器] 错误：未找到服务器入口文件：%s</string>
+    <string name="log_dir_requirement">[服务器] 服务器目录 %s 必须包含 PocketMine-MP.phar（推荐，菜单 > 下载服务器）或完整源码 src/pocketmine/PocketMine.php。</string>
+    <string name="log_src_tip">[服务器] 提示：仅有 src/pocketmine/ 是不够的——源码运行还需要其他 src/ 子目录和 vendor/ 依赖库。使用 PocketMine-MP.phar 最省事，它已包含全部内容。</string>
+    <string name="log_files_in">[服务器] %1$s 目录当前内容：%2$s</string>
+    <string name="log_pty_busybox_missing">[服务器] PTY 控制台：busybox 不可用——改用管道模式（输入的命令将无法送达服务器）。</string>
+    <string name="log_pty_selftest_fail">[服务器] PTY 控制台：自检失败——改用管道模式。设备可能禁止应用使用 PTY，或 busybox 不支持 script -c。</string>
+    <string name="log_pty_on">[服务器] PTY 控制台已开启，命令输入应可正常使用。</string>
+    <string name="log_launch_retry">[服务器] 从 %1$s 启动失败；改用工作目录 %2$s 重试。</string>
+    <string name="log_start_failed">[服务器] 无法启动 PHP。</string>
+    <string name="log_php_diag">[服务器] php：大小=%1$s 可执行=%2$s 架构=%3$s 设备=%4$s</string>
+    <string name="log_php_not_executable">[服务器] php 二进制没有执行权限。请在应用内重新安装（设置 > 安装 PHP）。</string>
+    <string name="log_php_arch_mismatch">[服务器] php 架构（%1$s）与设备（%2$s）不匹配。arm64 设备请在「安装 PHP」里使用 PHP 8.x（arm64），不要用 32 位的 PHP 7.x。</string>
+    <string name="log_php_launch_unknown">[服务器] php 有执行权限且架构匹配但启动失败，请查看上方 IOException 的具体原因。二进制可能损坏，或设备禁止从应用目录执行——通过「安装 PHP」重新安装 arm64 版本通常可以解决。</string>
+    <string name="log_php_missing_at">[服务器] 在 %s 找不到 php 二进制</string>
+    <string name="log_pty_selftest_says">[服务器] pty 自检输出：%s</string>
+    <string name="log_pty_selftest_error">[服务器] pty 自检出错：%s</string>
+    <string name="log_start_exception">[服务器] 无法启动 PHP：%s</string>
+    <string name="log_server_stopped">[服务器] 服务器已停止。</string>
+    <string name="log_cmd_not_running">[控制台] 无法发送命令：服务器未运行，请先启动服务器。</string>
+    <string name="log_cmd_exited">[控制台] 无法发送命令：服务器进程已退出，请查看日志中的崩溃信息。</string>
+    <string name="log_cmd_failed">[控制台] 发送命令失败：%s</string>
+    <string name="log_service_started">[服务器] 前台服务已启动，正在启动服务器进程。</string>
+    <string name="log_frpc_missing">[frp] 已开启隧道但未安装 frpc。请打开 frp 设置（菜单 > frp 隧道）安装；服务器将暂不使用隧道运行。</string>
+    <string name="log_stop_requested">[服务器] 已请求停止，正在向服务器发送 stop…</string>
+    <string name="log_force_kill_timeout">[服务器] 未能及时退出，正在强制结束。</string>
+    <string name="log_force_kill">[服务器] 强制结束服务器与隧道。</string>
+    <string name="log_frp_already">[frp] frpc 已在运行，不再启动第二个实例。</string>
+    <string name="log_frp_start_failed">[frp] 启动 frpc 失败：%s</string>
+    <string name="log_frp_started">[frp] frpc 已启动（配置：%s）</string>
+    <string name="log_frp_could_not">[frp] 无法启动 frpc：%s</string>
+    <string name="log_frp_stopping">[frp] 正在停止 frpc…</string>
+    <string name="log_frp_exited">[frp] frpc 进程已退出。</string>
+    <string name="log_php_probe">[服务器] php 探测（%1$s）：%2$s</string>
 </resources>

@@ -1,4 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Material 3 migration: legacy styles removed; UI now uses Material components. -->
+
+    <!-- Console command box: fully rounded, thicker look -->
+    <style name="ConsoleInput" parent="Widget.Material3.TextInputLayout.OutlinedBox">
+        <item name="boxCornerRadiusTopStart">24dp</item>
+        <item name="boxCornerRadiusTopEnd">24dp</item>
+        <item name="boxCornerRadiusBottomStart">24dp</item>
+        <item name="boxCornerRadiusBottomEnd">24dp</item>
+        <item name="boxStrokeWidth">1dp</item>
+        <item name="hintEnabled">true</item>
+    </style>
 </resources>

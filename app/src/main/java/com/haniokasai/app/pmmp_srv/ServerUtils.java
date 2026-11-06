@@ -43,38 +43,88 @@ public final class ServerUtils {
     /**
      * Server working directory.
      *
-     * By default we use /storage/emulated/0/PocketMine so users can manage their
-     * server files directly from a file manager. Because targetSdk is 28 (legacy
-     * storage), a granted WRITE_EXTERNAL_STORAGE is enough — no
-     * MANAGE_EXTERNAL_STORAGE needed. If the permission is missing we fall back
-     * to the app-private external-files directory so the app does not crash.
+     * Always /storage/emulated/0/PocketMine so users can manage their server
+     * files directly from a file manager. Because targetSdk is 28 (legacy
+     * storage) a granted WRITE_EXTERNAL_STORAGE is enough — no
+     * MANAGE_EXTERNAL_STORAGE needed and no fallback to app-private dirs.
      */
     public static String getDataDirectory() {
-        File dir;
-        if (canWriteSharedStorage()) {
-            dir = new File(Environment.getExternalStorageDirectory(), "PocketMine");
-        } else {
-            dir = new File(mContext.getExternalFilesDir(null), "PocketMine");
-        }
+        File dir = new File("/storage/emulated/0/PocketMine");
         dir.mkdirs();
         return dir.getPath();
     }
 
     /**
-     * Whether the app can read/write the shared external-storage root
-     * (/storage/emulated/0/PocketMine).
-     * - API < 23: always allowed.
-     * - API 23..29: WRITE_EXTERNAL_STORAGE (legacy storage, targetSdk 28).
-     * - API >= 30: WRITE_EXTERNAL_STORAGE is scoped and cannot reach an
-     *   arbitrary /PocketMine folder, so MANAGE_EXTERNAL_STORAGE is required.
+     * Whether we can actually reach /storage/emulated/0 on this device.
+     * Android 11+ needs MANAGE_EXTERNAL_STORAGE for an arbitrary folder even
+     * when the app targets SDK 28, which is why the folder can exist yet be
+     * unreadable ("Could not open input file" from PHP).
      */
-    private static boolean canWriteSharedStorage() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
-        if (Build.VERSION.SDK_INT >= 30) {
-            return Environment.isExternalStorageManager();
+    public static boolean hasSharedStorageAccess() {
+        // The authoritative test is "can we actually read the folder?", not the
+        // permission flags: on Android 11+ a legacy-storage app (targetSdk 28)
+        // can read /storage/emulated/0 without MANAGE_EXTERNAL_STORAGE, and the
+        // flag-only check wrongly reported "no access" on such devices.
+        try {
+            File[] probe = new File("/storage/emulated/0").listFiles();
+            if (probe != null && probe.length > 0) return true;
+        } catch (Exception ignored) {
         }
+        if (Build.VERSION.SDK_INT >= 30 && Environment.isExternalStorageManager()) return true;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) return true;
         return mContext.checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
                 == android.content.pm.PackageManager.PERMISSION_GRANTED;
+    }
+
+    /**
+     * Finds the server entry file inside the server directory.
+     *
+     * Real-world folders are messy: besides the standard PocketMine-MP.phar and
+     * src/pocketmine/PocketMine.php, people keep forks in src1/, src_hack/ or
+     * ClearSky/. We probe, in order: PocketMine-MP.phar -> any *.phar ->
+     * src/pocketmine/PocketMine.php -> <subdir>/src/pocketmine/PocketMine.php.
+     * Returns the path relative to the server directory, or null if none.
+     */
+    private static String findServerEntry(File dir) {
+        File phar = new File(dir, "PocketMine-MP.phar");
+        if (phar.exists()) return "/PocketMine-MP.phar";
+
+        File[] roots = dir.listFiles();
+        if (roots != null) {
+            for (File f : roots) {
+                if (f.isFile() && f.getName().toLowerCase().endsWith(".phar")) {
+                    return "/" + f.getName();
+                }
+            }
+        }
+        // Standard layout first.
+        File std = new File(dir, "src/pocketmine/PocketMine.php");
+        if (std.exists()) return "/src/pocketmine/PocketMine.php";
+
+        // Then any <folder>/pocketmine/PocketMine.php, searched a few levels
+        // deep so forks living in src1/, src_hack/, ClearSky/ are picked up too.
+        File found = findPocketMinePhp(dir, 0);
+        if (found != null) {
+            String rel = found.getAbsolutePath().substring(dir.getAbsolutePath().length());
+            return rel.startsWith("/") ? rel : "/" + rel;
+        }
+        return null;
+    }
+
+    /** Recursive probe for a pocketmine/PocketMine.php pair, max 3 levels deep. */
+    private static File findPocketMinePhp(File dir, int depth) {
+        if (dir == null || depth > 3) return null;
+        File direct = new File(dir, "pocketmine/PocketMine.php");
+        if (direct.exists()) return direct;
+        File[] children = dir.listFiles();
+        if (children == null) return null;
+        for (File f : children) {
+            if (f.isDirectory()) {
+                File r = findPocketMinePhp(f, depth + 1);
+                if (r != null) return r;
+            }
+        }
+        return null;
     }
 
     public static String getPhpBinaryPath() {
@@ -122,7 +172,7 @@ public final class ServerUtils {
         // console appear to accept commands that never reach the server.
         // stopNotifyService()/killServer() reset the process handle.
         if (isRunning()) {
-            ConsoleActivity.log("[PE Server] Server is already running; ignoring duplicate start request.");
+            ConsoleActivity.log(R.string.log_server_already_running);
             return;
         }
         File f = new File(getDataDirectory(), "/tmp");
@@ -136,18 +186,35 @@ public final class ServerUtils {
 
         String execPath = PhpManager.prepareExecutable(mContext);
         if (execPath == null) {
-            ConsoleActivity.log("[PE Server] php binary missing. Install it via Install PHP.");
+            ConsoleActivity.log(R.string.log_php_missing);
             ServerService.onServerExited();
             return;
         }
-        ConsoleActivity.log("[PE Server] Using php: " + execPath);
+        ConsoleActivity.log(R.string.log_using_php, execPath);
 
-        String file;
-
-        if (new File(getDataDirectory() + "/PocketMine-MP.phar").exists()) {
-            file = "/PocketMine-MP.phar";
+        // Auto-detect the entry file instead of assuming the standard layout.
+        String file = findServerEntry(new File(getDataDirectory()));
+        if (file == null) {
+            file = "/src/pocketmine/PocketMine.php"; // reported as missing below
         } else {
-            file = "/src/pocketmine/PocketMine.php";
+            ConsoleActivity.log(R.string.log_entry_detected, getDataDirectory() + file);
+        }
+
+        // Verify the server entry file actually exists BEFORE launching, so the
+        // user gets a clear hint instead of PHP's terse
+        // "Could not open input file: ..." line.
+        File entry = new File(getDataDirectory() + file);
+        if (!entry.exists()) {
+            if (!hasSharedStorageAccess()) {
+                ConsoleActivity.log(R.string.log_no_storage_access);
+            }
+            ConsoleActivity.log(R.string.log_entry_missing, entry.getPath());
+            ConsoleActivity.log(R.string.log_dir_requirement, getDataDirectory());
+            ConsoleActivity.log(R.string.log_src_tip);
+            ConsoleActivity.log(R.string.log_files_in, getDataDirectory(),
+                    listDirSummary(new File(getDataDirectory())));
+            ServerService.onServerExited();
+            return;
         }
 
         File ini = new File(getDataDirectory() + "/php.ini");
@@ -185,14 +252,11 @@ public final class ServerUtils {
         if (AppSettings.ptyConsole(mContext)) {
             busybox = PhpManager.ensureBusybox(mContext);
             if (busybox == null) {
-                ConsoleActivity.log("[PE Server] PTY console: busybox is unavailable - using pipe mode"
-                        + " (typed commands will NOT reach the server).");
+                ConsoleActivity.log(R.string.log_pty_busybox_missing);
             } else if (ptySelfTest(busybox)) {
                 pty = true;
             } else {
-                ConsoleActivity.log("[PE Server] PTY console: self-test failed - using pipe mode"
-                        + " (typed commands will NOT reach the server). This device may forbid PTYs"
-                        + " for apps, or this busybox may not support 'script -c'.");
+                ConsoleActivity.log(R.string.log_pty_selftest_fail);
             }
         }
 
@@ -206,7 +270,7 @@ public final class ServerUtils {
             args.add("-c");
             args.add(inner);
             args.add("/dev/null");
-            ConsoleActivity.log("[PE Server] PTY console: ON - console input should now work.");
+            ConsoleActivity.log(R.string.log_pty_on);
         } else {
             args.add(execPath);
             args.add("-c");
@@ -228,32 +292,27 @@ public final class ServerUtils {
             // Some devices refuse chdir into external storage (EACCES) even with
             // MANAGE_EXTERNAL_STORAGE. All paths in args are absolute, so the
             // server still finds php.ini and the phar; only its data dir changes.
-            ConsoleActivity.log("[PE Server] Launch failed from " + cwd.getAbsolutePath()
-                    + "; retrying with cwd=" + getAppDirectory());
+            ConsoleActivity.log(R.string.log_launch_retry, cwd.getAbsolutePath(), getAppDirectory());
             builder.directory(new File(getAppDirectory()));
             launchAndMonitor(builder);
         }
 
         if (serverProcess == null) {
             File php = new File(getPhpBinaryPath());
-            ConsoleActivity.log("[PE Server] Unable to start PHP.");
+            ConsoleActivity.log(R.string.log_start_failed);
             if (php.exists()) {
                 String arch = PhpManager.getBinaryArch(php);
-                ConsoleActivity.log("[PE Server] php: size=" + php.length()
-                        + " canExecute=" + php.canExecute()
-                        + " arch=" + arch
-                        + " device=" + PhpManager.getAbiSummary());
+                ConsoleActivity.log(R.string.log_php_diag, String.valueOf(php.length()),
+                        String.valueOf(php.canExecute()), arch, PhpManager.getAbiSummary());
                 if (!php.canExecute()) {
-                    ConsoleActivity.log("[PE Server] php binary is NOT executable. Try reinstalling PHP via the in-app installer (Settings > Install PHP).");
+                    ConsoleActivity.log(R.string.log_php_not_executable);
                 } else if (!PhpManager.isBinaryCompatibleWithDevice(php)) {
-                    ConsoleActivity.log("[PE Server] php binary architecture (" + arch
-                            + ") is incompatible with this device (" + PhpManager.getAbiSummary()
-                            + "). Install a matching build: on an arm64 device use PHP 8.x (arm64) from Install PHP, not the 32-bit bundled PHP 7.x.");
+                    ConsoleActivity.log(R.string.log_php_arch_mismatch, arch, PhpManager.getAbiSummary());
                 } else {
-                    ConsoleActivity.log("[PE Server] php is executable and arch-compatible but failed to launch. See the IOException(s) above for the exact reason (errno / SELinux / noexec). The binary may be corrupted/incomplete, or the device blocks execution from app storage — a fresh arm64 build via Install PHP often helps.");
+                    ConsoleActivity.log(R.string.log_php_launch_unknown);
                 }
             } else {
-                ConsoleActivity.log("[PE Server] php binary missing at " + getPhpBinaryPath());
+                ConsoleActivity.log(R.string.log_php_missing_at, getPhpBinaryPath());
             }
             ServerService.onServerExited();
             killServer();
@@ -298,10 +357,10 @@ public final class ServerUtils {
                 Thread.sleep(50L);
             }
             String out = sb.toString().replace('\r', ' ').replace('\n', ' ').trim();
-            ConsoleActivity.log("[PE Server] pty self-test says: " + (out.isEmpty() ? "(no output)" : out));
+            ConsoleActivity.log(R.string.log_pty_selftest_says, out.isEmpty() ? "(no output)" : out);
             return out.contains("PTY_OK");
         } catch (Exception e) {
-            ConsoleActivity.log("[PE Server] pty self-test error: " + e);
+            ConsoleActivity.log(R.string.log_pty_selftest_error, String.valueOf(e));
             return false;
         } finally {
             if (p != null) {
@@ -333,7 +392,7 @@ public final class ServerUtils {
         try {
             serverProcess = builder.start();
         } catch (Exception e) {
-            ConsoleActivity.log("[PE Server] Unable to start PHP: " + e.getMessage());
+            ConsoleActivity.log(R.string.log_start_exception, String.valueOf(e.getMessage()));
             return false;
         }
         stdout = serverProcess.getInputStream();
@@ -376,12 +435,25 @@ public final class ServerUtils {
                         }
                     }
                 }
-                ConsoleActivity.log("[PE Server] Server was stopped.");
+                ConsoleActivity.log(R.string.log_server_stopped);
                 ServerService.onServerExited();
             }
         };
         tMonitor.start();
         return true;
+    }
+
+    /** Compact listing of a directory's contents for diagnostics. */
+    private static String listDirSummary(File dir) {
+        File[] files = dir.listFiles();
+        if (files == null || files.length == 0) return "(empty or unreadable)";
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < files.length && i < 20; i++) {
+            if (i > 0) sb.append(", ");
+            sb.append(files[i].getName()).append(files[i].isDirectory() ? "/" : "");
+        }
+        if (files.length > 20) sb.append(", ... (").append(files.length).append(" total)");
+        return sb.toString();
     }
 
     final static public void setPermission() {
@@ -394,28 +466,23 @@ public final class ServerUtils {
 
     public static void writeCommand(String Cmd) {
         if (serverProcess == null || stdin == null) {
-            ConsoleActivity.log("[Console] Cannot send command: server is not running. Start the server first.");
+            ConsoleActivity.log(R.string.log_cmd_not_running);
             return;
         }
         if (!isRunning()) {
-            ConsoleActivity.log("[Console] Cannot send command: server process has already exited. Check the log for a crash.");
+            ConsoleActivity.log(R.string.log_cmd_exited);
             return;
         }
         try {
             stdin.write((Cmd + "\r\n").getBytes());
             stdin.flush();
         } catch (Exception e) {
-            ConsoleActivity.log("[Console] Failed to send command to server: " + e.getMessage());
+            ConsoleActivity.log(R.string.log_cmd_failed, String.valueOf(e.getMessage()));
         }
     }
 
     public static String getBackupDirectory() {
-        File dir;
-        if (canWriteSharedStorage()) {
-            dir = new File(Environment.getExternalStorageDirectory(), "PocketMine-Backups");
-        } else {
-            dir = new File(mContext.getExternalFilesDir(null), "PocketMine-Backups");
-        }
+        File dir = new File("/storage/emulated/0/PocketMine-Backups");
         dir.mkdirs();
         return dir.getPath();
     }

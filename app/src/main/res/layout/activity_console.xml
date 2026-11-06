@@ -10,7 +10,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/default_bg"
         android:contentDescription="@null" />
 
     <!-- Glass content layer -->
@@ -55,22 +54,14 @@
                     android:textIsSelectable="true" />
             </ScrollView>
 
-            <com.google.android.material.card.MaterialCardView
+            <!-- command panel (no enclosing card frame) -->
+            <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
-                app:cardBackgroundColor="@color/glass_card"
-                app:cardCornerRadius="18dp"
-                app:cardElevation="0dp"
-                app:contentPadding="12dp"
-                app:strokeColor="@color/glass_stroke"
-                app:strokeWidth="1dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical">
+                android:padding="4dp"
+                android:orientation="vertical">
 
                     <TextView
                         style="@style/TextAppearance.Material3.TitleSmall"
@@ -79,7 +70,7 @@
                         android:text="@string/console_hint" />
 
                     <com.google.android.material.textfield.TextInputLayout
-                        style="@style/Widget.Material3.TextInputLayout.OutlinedBox"
+                        style="@style/ConsoleInput"
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_marginTop="12dp"
@@ -101,8 +92,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:text="@string/button_send" />
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
         </LinearLayout>
     </LinearLayout>
 </FrameLayout>

@@ -66,10 +66,16 @@
                 android:text="@string/theme_dark" />
 
             <RadioButton
-                android:id="@+id/rb_theme_custom"
+                android:id="@+id/rb_theme_gray"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/theme_custom" />
+                android:text="@string/theme_gray" />
+
+            <RadioButton
+                android:id="@+id/rb_theme_deepblue"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/theme_deepblue" />
         </RadioGroup>
 
         <TextView
@@ -114,38 +120,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/accent_teal" />
-        </RadioGroup>
 
-        <TextView
-            style="@style/TextAppearance.Material3.TitleSmall"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="@string/settings_orientation" />
-
-        <RadioGroup
-            android:id="@+id/rg_orientation"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:paddingStart="8dp">
-
-            <RadioButton
-                android:id="@+id/rb_orientation_landscape"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/orientation_landscape" />
-
-            <RadioButton
-                android:id="@+id/rb_orientation_portrait"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/orientation_portrait" />
-
-            <RadioButton
-                android:id="@+id/rb_orientation_auto"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="@string/orientation_auto" />
         </RadioGroup>
 
         <TextView
@@ -186,6 +161,7 @@
             android:paddingEnd="8dp"
             android:text="@string/settings_console_autoscroll_hint" />
 
+
         <TextView
             style="@style/TextAppearance.Material3.TitleSmall"
             android:layout_width="match_parent"
@@ -216,5 +192,13 @@
                 android:layout_weight="1"
                 android:text="@string/bg_reset" />
         </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/button_grant_storage"
+            style="@style/Widget.Material3.Button.OutlinedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/storage_grant_button" />
     </LinearLayout>
 </ScrollView>
