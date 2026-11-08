@@ -57,13 +57,13 @@ public final class UiUtils {
     }
 
     /**
-     * Backdrop policy (saves GPU/CPU):
-     *  - No custom wallpaper selected: a SOLID color taken from the current
-     *    theme's android:colorBackground — so a light theme gets a white
-     *    backdrop, a dark theme a black one, and the gray theme a gray one.
-     *    No image decoding, no blur — the cheapest possible option.
-     *  - Custom wallpaper selected: show the image as-is, WITHOUT blur
-     *    (RenderEffect blur on every frame is expensive on low-end devices).
+     * Backdrop policy:
+     *  - No custom wallpaper selected: show the BUNDLED default image
+     *    (default_bg.jpg in landscape, default_bg_portrait.jpg in portrait),
+     *    so the app always has a proper background instead of a flat color.
+     *  - Custom wallpaper selected (or if the bundled drawable fails): show
+     *    the image as-is, WITHOUT blur (RenderEffect blur every frame is
+     *    expensive on low-end devices).
      */
     /**
      * Tints every menu icon with the theme's colorOnSurface.
@@ -135,8 +135,22 @@ public final class UiUtils {
             }
         }
         if (!loaded) {
+            // No custom wallpaper: fall back to the bundled default image.
+            // Picking the portrait variant in portrait keeps faces/subjects from
+            // being cropped off by centerCrop on a tall screen.
+            boolean isPortrait = activity.getResources().getConfiguration().orientation
+                    == android.content.res.Configuration.ORIENTATION_PORTRAIT;
+            int resId = isPortrait ? R.drawable.default_bg_portrait : R.drawable.default_bg;
+            try {
+                backdrop.setImageResource(resId);
+                loaded = true;
+            } catch (Exception ignored) {
+                // fall through to the solid color below
+            }
+        }
+        if (!loaded) {
             backdrop.setImageDrawable(null);
-            // Follow the active theme (light → white, dark → black, gray → gray).
+            // Last resort: follow the active theme (light → white, dark → black).
             android.util.TypedValue tv = new android.util.TypedValue();
             if (activity.getTheme().resolveAttribute(android.R.attr.colorBackground, tv, true)) {
                 backdrop.setBackgroundColor(tv.data);

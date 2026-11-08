@@ -113,17 +113,17 @@ public final class AppSettings {
     // ---- screen orientation --------------------------------------------
 
     /**
-     * Preferred screen orientation: {@code "landscape"} (default),
-     * {@code "portrait"} or {@code "auto"} (follow the sensor).
+     * Preferred screen orientation: {@code "auto"} (default, follow the sensor),
+     * {@code "portrait"} or {@code "landscape"} (force that direction).
      *
-     * The app was landscape-only for a long time because the console log and the
-     * server controls are laid out side by side; portrait is offered for people
-     * who want the app to follow the device instead of being force-rotated.
+     * "auto" lets the app rotate freely with the device, so both portrait and
+     * landscape work without forcing the user into one; the two explicit values
+     * lock the app when the sensor behaviour is unwanted.
      */
     public static String orientation(Context c) {
-        String v = prefs(c).getString(KEY_ORIENTATION, "landscape");
-        if ("portrait".equals(v) || "auto".equals(v)) return v;
-        return "landscape";
+        String v = prefs(c).getString(KEY_ORIENTATION, "auto");
+        if ("portrait".equals(v) || "auto".equals(v) || "landscape".equals(v)) return v;
+        return "auto";
     }
 
     public static void setOrientation(Context c, String value) {
@@ -131,11 +131,22 @@ public final class AppSettings {
     }
 
     /**
-     * The app is portrait-only now: the orientation preference was removed and
-     * every activity is forced to SCREEN_ORIENTATION_PORTRAIT.
+     * Resolves the stored orientation preference to an ActivityInfo constant.
+     *
+     * This is what actually controls the screen direction; the manifest does
+     * not hardcode one, so applyOrientation() is the single source of truth.
+     * "auto" follows the sensor (free rotation), the other two lock the app.
      */
     public static int orientationConstant(Context c) {
-        return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+        switch (orientation(c)) {
+            case "portrait":
+                return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT;
+            case "landscape":
+                return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
+            case "auto":
+            default:
+                return android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR;
+        }
     }
 
     /**
@@ -239,6 +250,28 @@ public final class AppSettings {
 
     public static void setProxyPort(Context c, int port) {
         prefs(c).edit().putInt(KEY_PROXY_PORT, port).apply();
+    }
+
+    // ---- built-in features (toggleable in Settings) ----------------------
+    public static final String KEY_FILE_MANAGER_ENABLED = "file_manager_enabled";
+    public static final String KEY_SYSINFO_ENABLED = "sysinfo_enabled";
+
+    /** Whether the in-app file manager (browse /storage/emulated/0/PocketMine) is available. */
+    public static boolean fileManagerEnabled(Context c) {
+        return prefs(c).getBoolean(KEY_FILE_MANAGER_ENABLED, true);
+    }
+
+    public static void setFileManagerEnabled(Context c, boolean enabled) {
+        prefs(c).edit().putBoolean(KEY_FILE_MANAGER_ENABLED, enabled).apply();
+    }
+
+    /** Whether the console shows live CPU / memory usage info. */
+    public static boolean sysInfoEnabled(Context c) {
+        return prefs(c).getBoolean(KEY_SYSINFO_ENABLED, true);
+    }
+
+    public static void setSysInfoEnabled(Context c, boolean enabled) {
+        prefs(c).edit().putBoolean(KEY_SYSINFO_ENABLED, enabled).apply();
     }
 
     /**

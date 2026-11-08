@@ -56,6 +56,16 @@
             android:exported="false"
             android:label="@string/title_frp" />
 
+        <activity
+            android:name=".FileManagerActivity"
+            android:exported="false"
+            android:label="@string/title_file_manager" />
+
+        <activity
+            android:name=".TextEditorActivity"
+            android:exported="false"
+            android:label="@string/title_text_editor" />
+
         <service
             android:name=".ServerService"
             android:exported="false"

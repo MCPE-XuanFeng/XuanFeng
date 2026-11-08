@@ -28,6 +28,31 @@
             app:title="@string/activity_console"
             app:titleTextColor="?attr/colorOnSurface" />
 
+        <!-- Live system info bar (CPU / memory); shown only when enabled in Settings -->
+        <LinearLayout
+            android:id="@+id/sysinfo_bar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:background="@color/glass_console_bg"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/label_sysinfo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:lineSpacingExtra="2dp"
+                android:textColor="?attr/colorPrimary"
+                android:text="@string/settings_sysinfo_hint" />
+        </LinearLayout>
+
         <!-- Two panes: log (left, fills) + command panel (right) -->
         <LinearLayout
             android:layout_width="match_parent"

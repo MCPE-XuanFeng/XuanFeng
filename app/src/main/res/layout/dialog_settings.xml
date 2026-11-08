@@ -128,6 +128,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:text="@string/settings_orientation" />
+
+        <RadioGroup
+            android:id="@+id/rg_orientation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp">
+
+            <RadioButton
+                android:id="@+id/rb_orient_auto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/orientation_auto" />
+
+            <RadioButton
+                android:id="@+id/rb_orient_portrait"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/orientation_portrait" />
+
+            <RadioButton
+                android:id="@+id/rb_orient_landscape"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/orientation_landscape" />
+        </RadioGroup>
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="@string/settings_console_title" />
 
         <com.google.android.material.checkbox.MaterialCheckBox
@@ -160,6 +192,45 @@
             android:paddingStart="8dp"
             android:paddingEnd="8dp"
             android:text="@string/settings_console_autoscroll_hint" />
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/settings_features_title" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/check_file_manager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingStart="8dp"
+            android:text="@string/settings_file_manager" />
+
+        <TextView
+            style="@style/TextAppearance.Material3.BodySmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/settings_file_manager_hint" />
+
+        <com.google.android.material.checkbox.MaterialCheckBox
+            android:id="@+id/check_sysinfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:paddingStart="8dp"
+            android:text="@string/settings_sysinfo" />
+
+        <TextView
+            style="@style/TextAppearance.Material3.BodySmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:text="@string/settings_sysinfo_hint" />
 
 
         <TextView

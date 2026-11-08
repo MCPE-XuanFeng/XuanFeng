@@ -137,6 +137,44 @@
 
     <string name="console_hint">Type a command and tap Send. Use /stop to shut down the server.</string>
 
+    <!-- Built-in features (toggleable in Settings) -->
+    <string name="settings_features_title">Features</string>
+    <string name="menu_file_manager">File Manager</string>
+    <string name="title_file_manager">File Manager</string>
+    <string name="settings_file_manager">Built-in file manager</string>
+    <string name="settings_file_manager_hint">Browse and manage the server folder (/storage/emulated/0/PocketMine) from inside the app.</string>
+    <string name="settings_sysinfo">CPU / memory info on console</string>
+    <string name="settings_sysinfo_hint">Shows live CPU usage and memory on the console (log) screen.</string>
+    <string name="file_manager_path">Path: %s</string>
+    <string name="file_manager_parent">Up</string>
+    <string name="file_manager_root">Root</string>
+    <string name="file_manager_empty">(empty)</string>
+    <string name="file_manager_open">Open</string>
+    <string name="file_manager_delete">Delete</string>
+    <string name="file_manager_delete_confirm">Delete %s? This cannot be undone.</string>
+    <string name="file_manager_delete_success">Deleted.</string>
+    <string name="file_manager_delete_failed">Delete failed.</string>
+    <string name="file_manager_disabled">File manager is turned off in Settings.</string>
+    <string name="file_manager_dir_label">Folder</string>
+
+    <!-- Text viewer (independent page) -->
+    <string name="title_text_editor">Text Viewer</string>
+    <string name="text_editor_copied">Copied.</string>
+    <string name="text_editor_share">Share</string>
+    <string name="text_editor_too_large">File is too large to display (%s).</string>
+    <string name="text_editor_read_error">Cannot read this file: %s</string>
+    <string name="text_editor_info">%1$s · %2$s</string>
+
+    <!-- File manager menu -->
+    <string name="menu_new_folder">New folder</string>
+    <string name="menu_refresh">Refresh</string>
+    <string name="menu_go_root">Go to root</string>
+    <string name="file_manager_new_folder">New folder</string>
+    <string name="file_manager_new_folder_hint">Folder name</string>
+    <string name="file_manager_new_folder_success">Folder created.</string>
+    <string name="file_manager_new_folder_fail">Could not create folder.</string>
+    <string name="file_manager_new_folder_exists">A folder or file with that name already exists.</string>
+
     <!-- frp tunnel (Material 3) -->
     <string name="title_frp">frp Tunnel</string>
     <string name="menu_frp">frp Tunnel</string>

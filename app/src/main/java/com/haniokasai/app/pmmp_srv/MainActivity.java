@@ -70,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
     public static Slider seekbar_fontsize = null;
     public static MenuItem menu_force_close = null, menu_install_php = null, menu_download_server = null,
             menu_delete_server = null, menu_backup_server = null, menu_hp = null, menu_twitter = null,
-            menu_bl_twitter = null, menu_help = null;
+            menu_bl_twitter = null, menu_help = null, menu_file_manager = null;
     public static SharedPreferences config = null;
 
     public static boolean isStarted = false, ansiMode = false;
@@ -387,6 +387,10 @@ public class MainActivity extends AppCompatActivity {
         menu_twitter = menu.findItem(R.id.menu_twitter);
         menu_bl_twitter = menu.findItem(R.id.menu_bl_twitter);
         menu_help = menu.findItem(R.id.menu_help);
+        menu_file_manager = menu.findItem(R.id.menu_file_manager);
+        if (menu_file_manager != null) {
+            menu_file_manager.setVisible(AppSettings.fileManagerEnabled(this));
+        }
         UiUtils.tintMenuIcons(this, menu);
         return true;
     }
@@ -478,6 +482,13 @@ public class MainActivity extends AppCompatActivity {
             intent = new Intent(Intent.ACTION_VIEW, uri);
             startActivity(intent);
             return true;
+        } else if (id == R.id.menu_file_manager) {
+            if (!AppSettings.fileManagerEnabled(this)) {
+                toast(R.string.file_manager_disabled);
+                return true;
+            }
+            startActivity(new Intent(instance, FileManagerActivity.class));
+            return true;
         } else if (id == R.id.menu_settings) {
             showSettingsDialog();
             return true;
@@ -497,6 +508,20 @@ public class MainActivity extends AppCompatActivity {
         RadioGroup rgLang = view.findViewById(R.id.rg_lang);
         RadioGroup rgTheme = view.findViewById(R.id.rg_theme);
         RadioGroup rgAccent = view.findViewById(R.id.rg_accent);
+        RadioGroup rgOrientation = view.findViewById(R.id.rg_orientation);
+
+        switch (AppSettings.orientation(this)) {
+            case "portrait":
+                rgOrientation.check(R.id.rb_orient_portrait);
+                break;
+            case "landscape":
+                rgOrientation.check(R.id.rb_orient_landscape);
+                break;
+            case "auto":
+            default:
+                rgOrientation.check(R.id.rb_orient_auto);
+                break;
+        }
 
         switch (AppSettings.theme(this)) {
             case "dark":
@@ -533,6 +558,12 @@ public class MainActivity extends AppCompatActivity {
         MaterialCheckBox checkAutoScroll = view.findViewById(R.id.check_console_autoscroll);
         checkAutoScroll.setChecked(AppSettings.consoleAutoScroll(this));
 
+        MaterialCheckBox checkFileManager = view.findViewById(R.id.check_file_manager);
+        checkFileManager.setChecked(AppSettings.fileManagerEnabled(this));
+
+        MaterialCheckBox checkSysInfo = view.findViewById(R.id.check_sysinfo);
+        checkSysInfo.setChecked(AppSettings.sysInfoEnabled(this));
+
         view.findViewById(R.id.button_change_bg).setOnClickListener(v -> {
             bgLauncher.launch(new String[]{"image/*"});
         });
@@ -563,10 +594,16 @@ public class MainActivity extends AppCompatActivity {
             else if (aid == R.id.rb_accent_amber) newAccent = "amber";
             else if (aid == R.id.rb_accent_teal) newAccent = "teal";
 
+            String newOrientation = "auto";
+            int oid = rgOrientation.getCheckedRadioButtonId();
+            if (oid == R.id.rb_orient_portrait) newOrientation = "portrait";
+            else if (oid == R.id.rb_orient_landscape) newOrientation = "landscape";
+
             SharedPreferences.Editor ed = AppSettings.prefs(this).edit();
             ed.putString(AppSettings.KEY_LANG, newLang);
             ed.putString(AppSettings.KEY_THEME, newTheme);
             ed.putString(AppSettings.KEY_ACCENT, newAccent);
+            ed.putString(AppSettings.KEY_ORIENTATION, newOrientation);
             ed.apply();
 
             boolean newPty = checkPty.isChecked();
@@ -577,6 +614,10 @@ public class MainActivity extends AppCompatActivity {
 
             // Takes effect immediately: the console reads it on every line.
             AppSettings.setConsoleAutoScroll(this, checkAutoScroll.isChecked());
+
+            // Built-in features (visibility / live info refreshed by recreate() below).
+            AppSettings.setFileManagerEnabled(this, checkFileManager.isChecked());
+            AppSettings.setSysInfoEnabled(this, checkSysInfo.isChecked());
 
             toast(getString(R.string.settings_applied));
             if (ptyChanged) {

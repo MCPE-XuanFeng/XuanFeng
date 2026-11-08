@@ -14,9 +14,17 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import android.app.ActivityManager;
+import android.text.format.Formatter;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.Locale;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -36,6 +44,30 @@ public class ConsoleActivity extends AppCompatActivity {
     public static TextView label_log = null;
     public static TextInputEditText edit_command = null;
     public static float font_size = 16.0f;
+
+    // Live system info bar (CPU / memory), toggleable in Settings.
+    private LinearLayout sysinfoBar = null;
+    private TextView labelSysInfo = null;
+    private final Handler sysHandler = new Handler(Looper.getMainLooper());
+    private final Runnable sysRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                updateSysInfo();
+            } catch (Throwable t) {
+                // A single bad sample (e.g. /proc/stat momentarily unreadable)
+                // must never kill the refresh loop.
+            }
+            // Always reschedule while the bar is visible.
+            if (sysinfoBar != null && sysinfoBar.getVisibility() == View.VISIBLE) {
+                sysHandler.postDelayed(this, SYSINFO_INTERVAL_MS);
+            }
+        }
+    };
+    private static final long SYSINFO_INTERVAL_MS = 2000L;
+    private long lastCpuTotal = 0;
+    private long lastCpuIdle = 0;
+    private boolean cpuSampled = false;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -61,6 +93,18 @@ public class ConsoleActivity extends AppCompatActivity {
         }
 
         instance = this;
+
+        sysinfoBar = findViewById(R.id.sysinfo_bar);
+        labelSysInfo = findViewById(R.id.label_sysinfo);
+        if (AppSettings.sysInfoEnabled(this) && sysinfoBar != null) {
+            sysinfoBar.setVisibility(View.VISIBLE);
+            // Show a placeholder immediately so the bar is never blank while
+            // the first CPU sample is still being collected.
+            if (labelSysInfo != null) {
+                labelSysInfo.setText(R.string.settings_sysinfo_hint);
+            }
+            sysHandler.post(sysRunnable);
+        }
 
         label_log = findViewById(R.id.label_log);
         edit_command = findViewById(R.id.edit_command);
@@ -88,6 +132,12 @@ public class ConsoleActivity extends AppCompatActivity {
             ServerUtils.writeCommand(edit_command.getText().toString());
             edit_command.setText("");
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        sysHandler.removeCallbacks(sysRunnable);
+        super.onDestroy();
     }
 
     @Override
@@ -303,5 +353,67 @@ public class ConsoleActivity extends AppCompatActivity {
         }
         int bottom = Math.max(0, child.getBottom() - sv.getHeight() + sv.getPaddingBottom());
         sv.scrollTo(0, bottom);
+    }
+
+    // ---- live system info (CPU / memory) ---------------------------------
+
+    private void updateSysInfo() {
+        if (labelSysInfo == null || sysinfoBar == null
+                || sysinfoBar.getVisibility() != View.VISIBLE) {
+            return;
+        }
+        // CPU usage: delta between two /proc/stat samples.
+        long[] cpu = readCpuStat();
+        String cpuStr = "--";
+        if (cpu != null) {
+            if (cpuSampled) {
+                long dTotal = cpu[0] - lastCpuTotal;
+                long dIdle = cpu[1] - lastCpuIdle;
+                if (dTotal > 0) {
+                    double usage = (1.0 - (double) dIdle / (double) dTotal) * 100.0;
+                    cpuStr = String.format(Locale.getDefault(), "%.1f%%", usage);
+                }
+            }
+            lastCpuTotal = cpu[0];
+            lastCpuIdle = cpu[1];
+            cpuSampled = true;
+        }
+
+        // Memory: system avail/total + this app's own heap.
+        ActivityManager am = (ActivityManager) getSystemService(ACTIVITY_SERVICE);
+        ActivityManager.MemoryInfo mi = new ActivityManager.MemoryInfo();
+        am.getMemoryInfo(mi);
+        String sysMem = Formatter.formatFileSize(this, mi.availMem) + " / "
+                + Formatter.formatFileSize(this, mi.totalMem);
+
+        Runtime rt = Runtime.getRuntime();
+        long used = rt.totalMemory() - rt.freeMemory();
+        String appMem = Formatter.formatFileSize(this, used) + " / "
+                + Formatter.formatFileSize(this, rt.maxMemory());
+
+        labelSysInfo.setText("CPU " + cpuStr + "   ·   内存 " + sysMem + "   ·   应用 " + appMem);
+    }
+
+    /** Reads the first "cpu" line of /proc/stat -> {total, idle + iowait}. */
+    private long[] readCpuStat() {
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader("/proc/stat"));
+            String line = reader.readLine();
+            reader.close();
+            if (line == null || !line.startsWith("cpu ")) return null;
+            String[] p = line.trim().split("\\s+");
+            if (p.length < 5) return null;
+            long user = Long.parseLong(p[1]);
+            long nice = Long.parseLong(p[2]);
+            long system = Long.parseLong(p[3]);
+            long idle = Long.parseLong(p[4]);
+            long iowait = p.length > 5 ? Long.parseLong(p[5]) : 0;
+            long irq = p.length > 6 ? Long.parseLong(p[6]) : 0;
+            long softirq = p.length > 7 ? Long.parseLong(p[7]) : 0;
+            long total = user + nice + system + idle + iowait + irq + softirq;
+            return new long[]{total, idle + iowait};
+        } catch (Exception e) {
+            return null;
+        }
     }
 }

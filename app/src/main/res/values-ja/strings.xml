@@ -52,4 +52,46 @@
     <string name="message_backup_success">バックアップ成功</string>
     <string name="message_backuping">バックアップ中...</string>
     <string name="message_backup_fail">バックアップ失敗。</string>
+
+    <!-- 組み込み機能（設定でオン/オフ） -->
+    <string name="settings_features_title">機能</string>
+    <string name="menu_file_manager">ファイル管理</string>
+    <string name="title_file_manager">ファイル管理</string>
+    <string name="settings_file_manager">内蔵ファイルマネージャー</string>
+    <string name="settings_file_manager_hint">アプリ内からサーバーフォルダ（/storage/emulated/0/PocketMine）を参照・管理します。</string>
+    <string name="settings_sysinfo">端末画面にCPU/メモリ情報を表示</string>
+    <string name="settings_sysinfo_hint">端末（ログ）画面にCPU使用率とメモリ使用量をリアルタイム表示します。</string>
+    <string name="settings_orientation">画面の向き</string>
+    <string name="orientation_auto">システムに従う</string>
+    <string name="orientation_portrait">縦向き</string>
+    <string name="orientation_landscape">横向き</string>
+    <string name="file_manager_path">パス: %s</string>
+    <string name="file_manager_parent">上へ</string>
+    <string name="file_manager_root">ルート</string>
+    <string name="file_manager_empty">（空）</string>
+    <string name="file_manager_open">開く</string>
+    <string name="file_manager_delete">削除</string>
+    <string name="file_manager_delete_confirm">%s を削除しますか？この操作は元に戻せません。</string>
+    <string name="file_manager_delete_success">削除しました。</string>
+    <string name="file_manager_delete_failed">削除に失敗しました。</string>
+    <string name="file_manager_disabled">ファイル管理は設定でオフになっています。</string>
+    <string name="file_manager_dir_label">フォルダ</string>
+
+    <!-- テキストビューア（独立画面） -->
+    <string name="title_text_editor">テキストビューア</string>
+    <string name="text_editor_copied">コピーしました。</string>
+    <string name="text_editor_share">共有</string>
+    <string name="text_editor_too_large">ファイルが大きすぎて表示できません（%s）。</string>
+    <string name="text_editor_read_error">このファイルを読めません：%s</string>
+    <string name="text_editor_info">%1$s · %2$s</string>
+
+    <!-- ファイル管理メニュー -->
+    <string name="menu_new_folder">新規フォルダ</string>
+    <string name="menu_refresh">更新</string>
+    <string name="menu_go_root">ルートへ</string>
+    <string name="file_manager_new_folder">新規フォルダ</string>
+    <string name="file_manager_new_folder_hint">フォルダ名</string>
+    <string name="file_manager_new_folder_success">フォルダを作成しました。</string>
+    <string name="file_manager_new_folder_fail">フォルダを作成できませんでした。</string>
+    <string name="file_manager_new_folder_exists">同名のフォルダまたはファイルが既に存在します。</string>
 </resources>

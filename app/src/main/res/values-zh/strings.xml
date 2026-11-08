@@ -137,6 +137,44 @@
 
     <string name="console_hint">输入命令后点“发送”。使用 /stop 关闭服务器。</string>
 
+    <!-- 内置功能（设置中可开关） -->
+    <string name="settings_features_title">功能</string>
+    <string name="menu_file_manager">文件管理</string>
+    <string name="title_file_manager">文件管理</string>
+    <string name="settings_file_manager">内置文件管理</string>
+    <string name="settings_file_manager_hint">在应用内直接浏览和管理服务器文件夹（/storage/emulated/0/PocketMine）。</string>
+    <string name="settings_sysinfo">日志页显示 CPU / 内存信息</string>
+    <string name="settings_sysinfo_hint">在控制台（日志）页面实时显示 CPU 占用与内存使用情况。</string>
+    <string name="file_manager_path">路径：%s</string>
+    <string name="file_manager_parent">返回上级</string>
+    <string name="file_manager_root">根目录</string>
+    <string name="file_manager_empty">（空目录）</string>
+    <string name="file_manager_open">打开</string>
+    <string name="file_manager_delete">删除</string>
+    <string name="file_manager_delete_confirm">确定删除 %s 吗？此操作不可恢复。</string>
+    <string name="file_manager_delete_success">已删除。</string>
+    <string name="file_manager_delete_failed">删除失败。</string>
+    <string name="file_manager_disabled">文件管理已在设置中关闭。</string>
+    <string name="file_manager_dir_label">文件夹</string>
+
+    <!-- 文本查看器（独立页面） -->
+    <string name="title_text_editor">文本查看器</string>
+    <string name="text_editor_copied">已复制。</string>
+    <string name="text_editor_share">分享</string>
+    <string name="text_editor_too_large">文件过大，无法显示（%s）。</string>
+    <string name="text_editor_read_error">无法读取该文件：%s</string>
+    <string name="text_editor_info">%1$s · %2$s</string>
+
+    <!-- 文件管理页菜单 -->
+    <string name="menu_new_folder">新建文件夹</string>
+    <string name="menu_refresh">刷新</string>
+    <string name="menu_go_root">回到根目录</string>
+    <string name="file_manager_new_folder">新建文件夹</string>
+    <string name="file_manager_new_folder_hint">请输入文件夹名称</string>
+    <string name="file_manager_new_folder_success">文件夹已创建。</string>
+    <string name="file_manager_new_folder_fail">创建文件夹失败。</string>
+    <string name="file_manager_new_folder_exists">同名文件夹或文件已存在。</string>
+
     <!-- frp 内网穿透 (Material 3) -->
     <string name="title_frp">frp 内网穿透</string>
     <string name="menu_frp">frp 内网穿透</string>

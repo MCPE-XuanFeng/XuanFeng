@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Full-screen frosted backdrop (image + blur by RenderEffect in UiUtils) -->
+    <ImageView
+        android:id="@+id/glassBackdrop"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scaleType="centerCrop"
+        android:contentDescription="@null" />
+
+    <!-- Glass content layer -->
+    <LinearLayout
+        android:id="@+id/root"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/glass_toolbar"
+            app:navigationIcon="?attr/homeAsUpIndicator"
+            app:title="@string/title_text_editor"
+            app:titleTextColor="?attr/colorOnSurface" />
+
+        <ScrollView
+            android:id="@+id/scroll_text"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/text_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/glass_console_bg"
+                android:fontFamily="monospace"
+                android:textSize="13sp"
+                android:lineSpacingExtra="2dp"
+                android:padding="10dp"
+                android:textColor="?attr/colorOnSurface"
+                android:textIsSelectable="true"
+                android:scrollbars="vertical" />
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/text_info"
+            style="@style/TextAppearance.Material3.BodySmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/glass_toolbar"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp"
+            android:textColor="?attr/colorOnSurface" />
+    </LinearLayout>
+</FrameLayout>
