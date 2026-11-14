@@ -21,7 +21,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 public final class ServerUtils {
@@ -41,17 +43,33 @@ public final class ServerUtils {
     }
 
     /**
-     * Server working directory.
+     * Server working directory for a given server type.
      *
-     * Always /storage/emulated/0/PocketMine so users can manage their server
-     * files directly from a file manager. Because targetSdk is 28 (legacy
-     * storage) a granted WRITE_EXTERNAL_STORAGE is enough — no
-     * MANAGE_EXTERNAL_STORAGE needed and no fallback to app-private dirs.
+     * PocketMine-MP lives in /storage/emulated/0/PocketMine and Nukkit in
+     * /storage/emulated/0/Nukkit so users can manage each server's files from a
+     * file manager. Because targetSdk is 28 (legacy storage) a granted
+     * WRITE_EXTERNAL_STORAGE is enough — no MANAGE_EXTERNAL_STORAGE needed and
+     * no fallback to app-private dirs.
      */
-    public static String getDataDirectory() {
-        File dir = new File("/storage/emulated/0/PocketMine");
+    public static String dirForType(String type) {
+        String name = "nukkit".equals(type) ? "Nukkit" : "PocketMine";
+        File dir = new File("/storage/emulated/0/" + name);
         dir.mkdirs();
         return dir.getPath();
+    }
+
+    /**
+     * Server working directory of the ACTIVE server type (see
+     * {@link AppSettings#serverType}). Used as the cwd and data root by the
+     * launcher, backup and delete flows.
+     */
+    public static String getDataDirectory() {
+        return dirForType(mContext != null ? AppSettings.serverType(mContext) : "pocketmine");
+    }
+
+    /** Where the user-editable startup script is stored (app-private, always writable). */
+    public static String getCustomScriptPath() {
+        return getAppDirectory() + "/start.sh";
     }
 
     /**
@@ -182,6 +200,34 @@ public final class ServerUtils {
             f.delete();
             f.mkdir();
         }
+
+        // A user-supplied startup script overrides the built-in launch command
+        // entirely. This is the "Advanced" escape hatch: it can launch anything
+        // (a custom Nukkit with a specific Java, a tuned PocketMine, etc.).
+        if (AppSettings.customScriptEnabled(mContext)) {
+            File script = new File(getCustomScriptPath());
+            if (script.exists()) {
+                ConsoleActivity.log(R.string.log_using_custom_script, getCustomScriptPath());
+                runCustomScript();
+                return;
+            } else {
+                ConsoleActivity.log(R.string.log_custom_script_missing, getCustomScriptPath());
+                // fall through to the built-in launcher for the active type
+            }
+        }
+
+        if ("nukkit".equals(AppSettings.serverType(mContext))) {
+            runNukkit();
+        } else {
+            runPocketMine();
+        }
+    }
+
+    /**
+     * Launches PocketMine-MP (the PHP server). Kept as its own method so the
+     * dispatcher can pick between it and the Nukkit / custom-script launchers.
+     */
+    private static void runPocketMine() {
         setPermission();
 
         String execPath = PhpManager.prepareExecutable(mContext);
@@ -246,58 +292,17 @@ public final class ServerUtils {
         String serverPath = getDataDirectory() + file;
         String ansiArg = MainActivity.ansiMode ? "--enable-ansi" : "--disable-ansi";
 
-        List<String> args = new ArrayList<>();
-        File busybox = null;
-        boolean pty = false;
-        if (AppSettings.ptyConsole(mContext)) {
-            busybox = PhpManager.ensureBusybox(mContext);
-            if (busybox == null) {
-                ConsoleActivity.log(R.string.log_pty_busybox_missing);
-            } else if (ptySelfTest(busybox)) {
-                pty = true;
-            } else {
-                ConsoleActivity.log(R.string.log_pty_selftest_fail);
-            }
-        }
+        List<String> plain = new ArrayList<>();
+        plain.add(execPath);
+        plain.add("-c");
+        plain.add(iniPath);
+        plain.add(serverPath);
+        plain.add(ansiArg);
+        String inner = shellQuote(execPath) + " -c " + shellQuote(iniPath)
+                + " " + shellQuote(serverPath) + " " + ansiArg + " --disable-readline";
 
-        if (pty) {
-            String inner = "stty -echo -onlcr 2>/dev/null; exec "
-                    + shellQuote(execPath) + " -c " + shellQuote(iniPath)
-                    + " " + shellQuote(serverPath) + " " + ansiArg + " --disable-readline";
-            args.add(busybox.getAbsolutePath());
-            args.add("script");
-            args.add("-q");
-            args.add("-c");
-            args.add(inner);
-            args.add("/dev/null");
-            ConsoleActivity.log(R.string.log_pty_on);
-        } else {
-            args.add(execPath);
-            args.add("-c");
-            args.add(iniPath);
-            args.add(serverPath);
-            args.add(ansiArg);
-        }
-
-        ProcessBuilder builder = new ProcessBuilder(args);
-        builder.redirectErrorStream(true);
-        File cwd = new File(getDataDirectory());
-        if (!cwd.isDirectory()) cwd = new File(getAppDirectory());
-        builder.directory(cwd);
-        Map<String, String> env = builder.environment();
-        env.put("TMPDIR", getDataDirectory() + "/tmp");
-
-        serverProcess = null;
-        if (!launchAndMonitor(builder) && !cwd.getAbsolutePath().equals(getAppDirectory())) {
-            // Some devices refuse chdir into external storage (EACCES) even with
-            // MANAGE_EXTERNAL_STORAGE. All paths in args are absolute, so the
-            // server still finds php.ini and the phar; only its data dir changes.
-            ConsoleActivity.log(R.string.log_launch_retry, cwd.getAbsolutePath(), getAppDirectory());
-            builder.directory(new File(getAppDirectory()));
-            launchAndMonitor(builder);
-        }
-
-        if (serverProcess == null) {
+        List<String> args = buildLaunchArgs(plain, inner);
+        if (!startProcess(args)) {
             File php = new File(getPhpBinaryPath());
             ConsoleActivity.log(R.string.log_start_failed);
             if (php.exists()) {
@@ -317,7 +322,192 @@ public final class ServerUtils {
             ServerService.onServerExited();
             killServer();
         }
-        return;
+    }
+
+    /**
+     * Launches Nukkit (the Java server). It needs a Java runtime: first the
+     * user-configured path (Advanced settings), then a "java" binary in the app
+     * dir, then "java" on PATH. The nukkit.jar is auto-detected in the server
+     * directory.
+     */
+    private static void runNukkit() {
+        File dir = new File(getDataDirectory());
+        String jar = findNukkitJar(dir);
+        if (jar == null) {
+            if (!hasSharedStorageAccess()) {
+                ConsoleActivity.log(R.string.log_no_storage_access);
+            }
+            ConsoleActivity.log(R.string.log_nukkit_missing, dir.getPath());
+            ConsoleActivity.log(R.string.log_nukkit_tip);
+            ConsoleActivity.log(R.string.log_files_in, dir.getPath(),
+                    listDirSummary(dir));
+            ServerService.onServerExited();
+            return;
+        }
+        ConsoleActivity.log(R.string.log_entry_detected, jar);
+
+        String java = findJava();
+        if (java == null) {
+            ConsoleActivity.log(R.string.log_java_missing);
+            ConsoleActivity.log(R.string.log_java_tip);
+            ServerService.onServerExited();
+            return;
+        }
+        ConsoleActivity.log(R.string.log_using_java, java);
+
+        List<String> plain = new ArrayList<>();
+        plain.add(java);
+        plain.add("-jar");
+        plain.add(jar);
+        String inner = shellQuote(java) + " -jar " + shellQuote(jar);
+
+        List<String> args = buildLaunchArgs(plain, inner);
+        if (!startProcess(args)) {
+            ConsoleActivity.log(R.string.log_start_failed);
+            ServerService.onServerExited();
+            killServer();
+        }
+    }
+
+    /**
+     * Runs the user-editable startup script (stored at {@link #getCustomScriptPath()}).
+     * The script is launched through "sh" so it can be a plain shell script that
+     * cd's into the server dir and exec's whatever it wants (a custom Java for
+     * Nukkit, a tuned PocketMine, etc.).
+     */
+    private static void runCustomScript() {
+        File script = new File(getCustomScriptPath());
+        PhpManager.makeExecutable(script);
+
+        List<String> plain = new ArrayList<>();
+        plain.add("sh");
+        plain.add(script.getAbsolutePath());
+        String inner = shellQuote("sh") + " " + shellQuote(script.getAbsolutePath());
+
+        List<String> args = buildLaunchArgs(plain, inner);
+        if (!startProcess(args)) {
+            ConsoleActivity.log(R.string.log_start_failed);
+            ServerService.onServerExited();
+            killServer();
+        }
+    }
+
+    /** Finds the first *.jar in the server directory (Nukkit entry). */
+    private static String findNukkitJar(File dir) {
+        File[] roots = dir.listFiles();
+        if (roots != null) {
+            // Prefer an exact nukkit.jar, then any jar.
+            for (File f : roots) {
+                if (f.isFile() && f.getName().equalsIgnoreCase("nukkit.jar")) {
+                    return f.getAbsolutePath();
+                }
+            }
+            for (File f : roots) {
+                if (f.isFile() && f.getName().toLowerCase().endsWith(".jar")) {
+                    return f.getAbsolutePath();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Resolves a Java runtime executable.
+     *
+     * Order: the user-configured path (Advanced settings) -> a "java" binary in
+     * the app dir -> "java" resolvable on PATH. Returns null when none exists,
+     * which lets the caller print a clear "install Java" hint instead of a
+     * cryptic "No such file".
+     */
+    private static String findJava() {
+        String cfg = AppSettings.javaPath(mContext);
+        if (cfg != null && !cfg.isEmpty()) {
+            File f = new File(cfg);
+            if (f.exists() && (f.canExecute() || f.setExecutable(true))) {
+                return f.getAbsolutePath();
+            }
+        }
+        File appJava = new File(getAppDirectory(), "java");
+        if (appJava.exists()) return appJava.getAbsolutePath();
+        // Last resort: java on PATH.
+        try {
+            Process p = Runtime.getRuntime().exec(new String[]{"sh", "-c", "command -v java 2>/dev/null"});
+            InputStream in = p.getInputStream();
+            StringBuilder sb = new StringBuilder();
+            byte[] buf = new byte[256];
+            int n;
+            while ((n = in.read(buf)) > 0) sb.append(new String(buf, 0, n, "UTF-8"));
+            in.close();
+            p.waitFor();
+            String out = sb.toString().trim();
+            if (!out.isEmpty()) return out;
+        } catch (Exception ignored) {
+        }
+        return null;
+    }
+
+    /**
+     * Builds the final process argument list for a server command.
+     *
+     * When PTY console mode is on, the command is wrapped in
+     * "busybox script" so the child gets a real terminal (MengFang's
+     * CommandReader needs isatty() to read stdin). Otherwise the plain argument
+     * list is used directly.
+     *
+     * @param plain  the command as it would run without a PTY (e.g. [java,-jar,x.jar])
+     * @param inner  the same command, single-quoted and joined, for the busybox
+     *               "script -c" shell (so paths with spaces stay intact).
+     */
+    private static List<String> buildLaunchArgs(List<String> plain, String inner) {
+        List<String> args = new ArrayList<>();
+        File busybox = null;
+        boolean pty = false;
+        if (AppSettings.ptyConsole(mContext)) {
+            busybox = PhpManager.ensureBusybox(mContext);
+            if (busybox == null) {
+                ConsoleActivity.log(R.string.log_pty_busybox_missing);
+            } else if (ptySelfTest(busybox)) {
+                pty = true;
+            } else {
+                ConsoleActivity.log(R.string.log_pty_selftest_fail);
+            }
+        }
+        if (pty) {
+            String full = "stty -echo -onlcr 2>/dev/null; exec " + inner;
+            args.add(busybox.getAbsolutePath());
+            args.add("script");
+            args.add("-q");
+            args.add("-c");
+            args.add(full);
+            args.add("/dev/null");
+            ConsoleActivity.log(R.string.log_pty_on);
+        } else {
+            args.addAll(plain);
+        }
+        return args;
+    }
+
+    /** Starts the process, wires up the console monitor, handles the external-storage
+     *  chdir fallback, and returns whether a process came up. */
+    private static boolean startProcess(List<String> args) {
+        ProcessBuilder builder = new ProcessBuilder(args);
+        builder.redirectErrorStream(true);
+        File cwd = new File(getDataDirectory());
+        if (!cwd.isDirectory()) cwd = new File(getAppDirectory());
+        builder.directory(cwd);
+        Map<String, String> env = builder.environment();
+        env.put("TMPDIR", getDataDirectory() + "/tmp");
+
+        serverProcess = null;
+        if (!launchAndMonitor(builder) && !cwd.getAbsolutePath().equals(getAppDirectory())) {
+            // Some devices refuse chdir into external storage (EACCES) even with
+            // MANAGE_EXTERNAL_STORAGE. All paths in args are absolute, so the
+            // server still finds its files; only its data dir changes.
+            ConsoleActivity.log(R.string.log_launch_retry, cwd.getAbsolutePath(), getAppDirectory());
+            builder.directory(new File(getAppDirectory()));
+            launchAndMonitor(builder);
+        }
+        return serverProcess != null;
     }
 
     /**
@@ -441,6 +631,130 @@ public final class ServerUtils {
         };
         tMonitor.start();
         return true;
+    }
+
+    /**
+     * Extracts the "java" executable from an archive into outJava.
+     *
+     * Supports .zip (java.util.zip) and .tar.gz (GZIPInputStream + a minimal
+     * tar reader). We scan for an entry whose name ends with "/java" or is
+     * exactly "java" and pull the first match out. Returns true if a java binary
+     * was written. Used by the "Install Java" flow so a single tap can turn a
+     * downloaded tarball into a runnable runtime.
+     */
+    public static boolean extractJava(File archive, File outJava) {
+        if (archive == null || !archive.exists()) return false;
+        String name = archive.getName().toLowerCase();
+        try {
+            if (name.endsWith(".zip")) {
+                return extractJavaFromZip(archive, outJava);
+            }
+            // Default: treat as tar.gz / tgz.
+            return extractJavaFromTarGz(archive, outJava);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private static boolean extractJavaFromZip(File archive, File outJava) throws Exception {
+        try (ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(archive)))) {
+            ZipEntry entry;
+            while ((entry = zis.getNextEntry()) != null) {
+                if (entry.isDirectory()) continue;
+                if (isJavaEntry(entry.getName())) {
+                    writeJava(zis, outJava);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean extractJavaFromTarGz(File archive, File outJava) throws Exception {
+        try (InputStream gin = new GZIPInputStream(new BufferedInputStream(new FileInputStream(archive)))) {
+            byte[] header = new byte[512];
+            byte[] buf = new byte[8192];
+            while (readFully(gin, header, 512)) {
+                // End-of-archive: two consecutive zero blocks.
+                boolean empty = true;
+                for (byte b : header) { if (b != 0) { empty = false; break; } }
+                if (empty) break;
+                String name = readTarName(header);
+                long size = readTarSize(header);
+                int type = header[156];
+                if ((type == '0' || type == 0) && isJavaEntry(name)) {
+                    // Found it: stream exactly `size` bytes out.
+                    long remaining = size;
+                    try (OutputStream os = new FileOutputStream(outJava)) {
+                        while (remaining > 0) {
+                            int toRead = (int) Math.min(buf.length, remaining);
+                            int n = gin.read(buf, 0, toRead);
+                            if (n < 0) break;
+                            os.write(buf, 0, n);
+                            remaining -= n;
+                        }
+                    }
+                    return true;
+                }
+                // Skip this entry's data (rounded up to 512).
+                long skip = ((size + 511) / 512) * 512;
+                while (skip > 0) {
+                    long s = gin.skip(skip);
+                    if (s <= 0) gin.read(); // make progress even if skip() lies
+                    skip -= Math.max(s, 1);
+                }
+            }
+        }
+        return false;
+    }
+
+    private static boolean isJavaEntry(String name) {
+        if (name == null) return false;
+        int slash = name.lastIndexOf('/');
+        String base = slash >= 0 ? name.substring(slash + 1) : name;
+        // Prefer a top-level or bin/ "java"; reject "javafx" etc.
+        return base.equals("java") || base.equals("java.exe");
+    }
+
+    private static void writeJava(InputStream in, File outJava) throws Exception {
+        try (OutputStream os = new FileOutputStream(outJava)) {
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = in.read(buf)) > 0) os.write(buf, 0, n);
+        }
+    }
+
+    private static boolean readFully(InputStream in, byte[] buf, int len) throws Exception {
+        int read = 0;
+        while (read < len) {
+            int n = in.read(buf, read, len - read);
+            if (n < 0) return read > 0;
+            read += n;
+        }
+        return true;
+    }
+
+    private static String readTarName(byte[] header) {
+        // Name occupies bytes 0..99 (NUL-terminated). Handle GNU long-name ('L')
+        int type = header[156];
+        if (type == 'L') {
+            // Long name: the data block (next) holds the full path.
+            return ""; // caller skips; rare for java entries
+        }
+        int end = 0;
+        while (end < 100 && header[end] != 0) end++;
+        return new String(header, 0, end, Charset.forName("UTF-8"));
+    }
+
+    private static long readTarSize(byte[] header) {
+        // Size is octal ASCII at offset 124, 12 bytes, NUL/space terminated.
+        long size = 0;
+        for (int i = 124; i < 136; i++) {
+            byte b = header[i];
+            if (b == 0 || b == ' ') break;
+            size = (size << 3) | (b - '0');
+        }
+        return size;
     }
 
     /** Compact listing of a directory's contents for diagnostics. */

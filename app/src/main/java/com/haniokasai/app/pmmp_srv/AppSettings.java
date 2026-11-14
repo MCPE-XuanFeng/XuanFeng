@@ -256,6 +256,48 @@ public final class AppSettings {
     public static final String KEY_FILE_MANAGER_ENABLED = "file_manager_enabled";
     public static final String KEY_SYSINFO_ENABLED = "sysinfo_enabled";
 
+    // ---- server type & advanced launch ---------------------------------
+    /** Active server software: "pocketmine" (PHP) or "nukkit" (Java). */
+    public static final String KEY_SERVER_TYPE = "server_type";
+    /** Path to a Java runtime executable used to launch Nukkit ("" = auto). */
+    public static final String KEY_JAVA_PATH = "java_path";
+    /** When on and a custom launch script exists, it replaces the built-in launch. */
+    public static final String KEY_CUSTOM_SCRIPT_ENABLED = "custom_script_enabled";
+
+    /**
+     * Active server software.
+     *
+     * "pocketmine" runs the PHP-based PocketMine-MP (PocketMine-MP.phar /
+     * src tree); "nukkit" runs the Java-based Nukkit (nukkit.jar) through a Java
+     * runtime. Defaults to pocketmine so existing installs keep working.
+     */
+    public static String serverType(Context c) {
+        String v = prefs(c).getString(KEY_SERVER_TYPE, "pocketmine");
+        return "nukkit".equals(v) ? "nukkit" : "pocketmine";
+    }
+
+    public static void setServerType(Context c, String v) {
+        prefs(c).edit().putString(KEY_SERVER_TYPE, "nukkit".equals(v) ? "nukkit" : "pocketmine").apply();
+    }
+
+    /** Path of the Java runtime used for Nukkit; empty means auto-detect. */
+    public static String javaPath(Context c) {
+        return prefs(c).getString(KEY_JAVA_PATH, "");
+    }
+
+    public static void setJavaPath(Context c, String p) {
+        prefs(c).edit().putString(KEY_JAVA_PATH, p == null ? "" : p).apply();
+    }
+
+    /** Whether the user-supplied startup script overrides the built-in launch. */
+    public static boolean customScriptEnabled(Context c) {
+        return prefs(c).getBoolean(KEY_CUSTOM_SCRIPT_ENABLED, false);
+    }
+
+    public static void setCustomScriptEnabled(Context c, boolean e) {
+        prefs(c).edit().putBoolean(KEY_CUSTOM_SCRIPT_ENABLED, e).apply();
+    }
+
     /** Whether the in-app file manager (browse /storage/emulated/0/PocketMine) is available. */
     public static boolean fileManagerEnabled(Context c) {
         return prefs(c).getBoolean(KEY_FILE_MANAGER_ENABLED, true);

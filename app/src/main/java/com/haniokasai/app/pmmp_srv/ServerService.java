@@ -74,6 +74,11 @@ public class ServerService extends Service {
         return null;
     }
 
+    /** Human-readable name of the server being run (for the notification). */
+    private String serverLabel() {
+        return "nukkit".equals(AppSettings.serverType(this)) ? "Nukkit" : "PocketMine";
+    }
+
     private void ensureChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             NotificationManager nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -94,7 +99,7 @@ public class ServerService extends Service {
         mStarted = true;
         ensureChannel();
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID);
-        builder.setContentTitle(("PocketMine") + " " + getString(R.string.message_running));
+        builder.setContentTitle(serverLabel() + " " + getString(R.string.message_running));
         builder.setContentText(getString(R.string.message_tap_open));
         builder.setOngoing(true);
         builder.setSmallIcon(R.drawable.ic_launcher);

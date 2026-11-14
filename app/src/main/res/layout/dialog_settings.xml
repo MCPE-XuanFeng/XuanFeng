@@ -160,6 +160,32 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:text="@string/label_type" />
+
+        <RadioGroup
+            android:id="@+id/rg_server_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingStart="8dp">
+
+            <RadioButton
+                android:id="@+id/rb_type_pocketmine"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/server_type_pocketmine" />
+
+            <RadioButton
+                android:id="@+id/rb_type_nukkit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/server_type_nukkit" />
+        </RadioGroup>
+
+        <TextView
+            style="@style/TextAppearance.Material3.TitleSmall"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
             android:text="@string/settings_console_title" />
 
         <com.google.android.material.checkbox.MaterialCheckBox

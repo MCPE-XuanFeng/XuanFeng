@@ -29,6 +29,27 @@
 
     <string name="label_management">服务器管理</string>
     <string name="label_type">服务器类型</string>
+    <string name="server_type_pocketmine">PocketMine-MP（PHP）</string>
+    <string name="server_type_nukkit">Nukkit（Java）</string>
+
+    <string name="title_advanced">高级</string>
+    <string name="advanced_custom_script">自定义启动脚本</string>
+    <string name="advanced_custom_script_hint">启用后，此脚本（start.sh）将取代内置启动命令，并在当前服务器目录下运行。</string>
+    <string name="advanced_script_saved">启动脚本已保存。</string>
+    <string name="advanced_reset_script">恢复默认模板</string>
+    <string name="advanced_java_path">Java 运行时路径（Nukkit）</string>
+    <string name="advanced_java_path_hint">java 可执行文件的路径。留空则自动检测（优先应用私有目录中的 java，其次系统 PATH）。</string>
+    <string name="advanced_save">保存设置</string>
+    <string name="advanced_note">Nukkit 需要 Android 上的 Java 8+ 运行时。可通过菜单“安装 Java”安装、在上方设置路径，或在自定义脚本中直接启动。</string>
+
+    <string name="install_java_title">安装 Java</string>
+    <string name="install_java_url">下载地址</string>
+    <string name="install_java_download">下载并安装</string>
+    <string name="install_java_choose">选择本地文件</string>
+    <string name="install_java_hint">请提供一个 java 可执行文件，或包含 java 的 .tar.gz/.zip 压缩包。Nukkit 需要 Android 上的 Java 8+ 运行时。</string>
+    <string name="install_java_success">Java 已安装。</string>
+    <string name="install_java_fail">Java 安装失败：%s</string>
+    <string name="install_java_local_hint">选择一个 java 二进制，或包含 java 的压缩包（.tar.gz/.zip）。</string>
     <string name="label_console">控制台设置</string>
     <string name="label_console_fontsize">字体大小：</string>
     <string name="label_pocketMine_to">将 PocketMine-MP.phar 或 src 文件夹放入 /storage/emulated/0/PocketMine</string>
@@ -52,6 +73,8 @@
     <string name="menu_install_php7">下载并安装 PHP7</string>
     <string name="menu_install_java">安装 Java</string>
     <string name="menu_download">下载服务器</string>
+    <string name="menu_download_nukkit">下载 Nukkit</string>
+    <string name="menu_advanced">高级</string>
     <string name="unknown_host">无法连接到服务器</string>
     <string name="menu_delete_server">删除服务器</string>
     <string name="menu_backup_server">备份服务器</string>
@@ -239,4 +262,11 @@
     <string name="log_frp_stopping">[frp] 正在停止 frpc…</string>
     <string name="log_frp_exited">[frp] frpc 进程已退出。</string>
     <string name="log_php_probe">[服务器] php 探测（%1$s）：%2$s</string>
+    <string name="log_using_custom_script">[服务器] 使用自定义启动脚本：%s</string>
+    <string name="log_custom_script_missing">[服务器] 已启用自定义脚本但找不到 %s，改用内置启动方式。</string>
+    <string name="log_nukkit_missing">[服务器] 错误：在 %s 中未找到 nukkit.jar</string>
+    <string name="log_nukkit_tip">[服务器] 提示：将 nukkit.jar 放入服务器目录（菜单“下载 Nukkit”），或在高级页编写自定义脚本。</string>
+    <string name="log_java_missing">[服务器] 未找到 Java 运行时。请通过菜单“安装 Java”安装、在高级页设置路径，或使用自定义脚本。</string>
+    <string name="log_java_tip">[服务器] Nukkit 需要 Android 上的 Java 8+ 运行时（例如应用目录中的 java 二进制，或系统 PATH 中的 java）。</string>
+    <string name="log_using_java">[服务器] 使用 java：%s</string>
 </resources>

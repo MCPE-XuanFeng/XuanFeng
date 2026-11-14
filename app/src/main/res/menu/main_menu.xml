@@ -14,6 +14,11 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_install_java"
+        android:title="@string/menu_install_java"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_file_manager"
         android:title="@string/menu_file_manager"
         app:showAsAction="never" />
@@ -26,6 +31,16 @@
     <item
         android:id="@+id/menu_download"
         android:title="@string/menu_download"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_download_nukkit"
+        android:title="@string/menu_download_nukkit"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_advanced"
+        android:title="@string/menu_advanced"
         app:showAsAction="never" />
 
     <item

@@ -29,6 +29,27 @@
     
     <string name="label_management">Server Management</string>
 	<string name="label_type">Server Type</string>
+	<string name="server_type_pocketmine">PocketMine-MP (PHP)</string>
+	<string name="server_type_nukkit">Nukkit (Java)</string>
+
+	<string name="title_advanced">Advanced</string>
+	<string name="advanced_custom_script">Custom startup script</string>
+	<string name="advanced_custom_script_hint">When enabled, this script (start.sh) replaces the built-in launch command. It runs from the active server directory.</string>
+	<string name="advanced_script_saved">Startup script saved.</string>
+	<string name="advanced_reset_script">Reset to default template</string>
+	<string name="advanced_java_path">Java runtime path (Nukkit)</string>
+	<string name="advanced_java_path_hint">Path to the java executable. Leave empty to auto-detect (app-private java, then PATH on the device).</string>
+	<string name="advanced_save">Save settings</string>
+	<string name="advanced_note">Nukkit needs a Java 8+ runtime for Android. Install one via menu &gt; Install Java, set its path above, or launch it from the custom script directly.</string>
+
+	<string name="install_java_title">Install Java</string>
+	<string name="install_java_url">Download URL</string>
+	<string name="install_java_download">Download &amp; install</string>
+	<string name="install_java_choose">Choose local file</string>
+	<string name="install_java_hint">Provide a java binary, or a .tar.gz/.zip that contains a java executable. Nukkit requires a Java 8+ runtime for Android.</string>
+	<string name="install_java_success">Java installed.</string>
+	<string name="install_java_fail">Java install failed: %s</string>
+	<string name="install_java_local_hint">Choose a java binary, or an archive (.tar.gz/.zip) that contains a java executable.</string>
 	<string name="label_console">Console Customize</string>
 	<string name="label_console_fontsize">Font Size:</string>
 	<string name="label_pocketMine_to">Put PocketMine-MP.phar or src folder to /storage/emulated/0/PocketMine</string>
@@ -52,6 +73,8 @@
     <string name="menu_install_php7">Download &amp; Install PHP7</string>
     <string name="menu_install_java">Install Java</string>
     <string name="menu_download">Download server</string>
+    <string name="menu_download_nukkit">Download Nukkit</string>
+    <string name="menu_advanced">Advanced</string>
     <string name="unknown_host">Can\'t connect to Server</string>
     <string name="menu_delete_server">Delete Server</string>
     <string name="menu_backup_server">Backup Server</string>
@@ -239,4 +262,11 @@
     <string name="log_frp_stopping">[frp] Stopping frpc…</string>
     <string name="log_frp_exited">[frp] frpc process exited.</string>
     <string name="log_php_probe">[Server] php probe (%1$s): %2$s</string>
+    <string name="log_using_custom_script">[Server] Using custom startup script: %s</string>
+    <string name="log_custom_script_missing">[Server] Custom script enabled but %s not found; using built-in launcher.</string>
+    <string name="log_nukkit_missing">[Server] ERROR: nukkit.jar not found in %s</string>
+    <string name="log_nukkit_tip">[Server] TIP: put nukkit.jar into the server directory (menu &gt; Download Nukkit), or write a custom script in Advanced.</string>
+    <string name="log_java_missing">[Server] Java runtime not found. Install it via menu &gt; Install Java, set the path in Advanced, or use a custom script.</string>
+    <string name="log_java_tip">[Server] Nukkit needs a Java 8+ runtime for Android (e.g. a java binary in the app dir, or on PATH).</string>
+    <string name="log_using_java">[Server] Using java: %s</string>
 </resources>

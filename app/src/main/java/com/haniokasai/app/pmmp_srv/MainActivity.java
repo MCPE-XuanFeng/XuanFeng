@@ -14,6 +14,7 @@ import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
 import android.widget.Toast;
@@ -101,6 +102,27 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
 
+    /** Picks a local java binary / archive for the Install Java flow. */
+    private final ActivityResultLauncher<String[]> javaLauncher = registerForActivityResult(
+            new ActivityResultContracts.OpenDocument(),
+            uri -> {
+                if (uri == null) return;
+                final java.io.File dst = new java.io.File(ServerUtils.getAppDirectory(), "java");
+                new Thread(() -> {
+                    try (java.io.InputStream in = getContentResolver().openInputStream(uri)) {
+                        java.io.File tmp = new java.io.File(ServerUtils.getAppDirectory(), "java_dl.tmp");
+                        java.io.FileOutputStream os = new java.io.FileOutputStream(tmp);
+                        byte[] buf = new byte[8192];
+                        int n;
+                        while ((n = in.read(buf)) > 0) os.write(buf, 0, n);
+                        os.close();
+                        installJavaFile(tmp);
+                    } catch (Exception e) {
+                        toast(getString(R.string.install_java_fail, String.valueOf(e.getMessage())));
+                    }
+                }).start();
+            });
+
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(AppSettings.wrap(newBase));
@@ -118,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
         UiUtils.setupEdgeToEdge(this, findViewById(R.id.root));
         UiUtils.applyGlassBackdrop(this, (ImageView) findViewById(R.id.glassBackdrop));
 
+        updateServerHint();
         ensureStoragePermission();
 
         Toolbar toolbar = findViewById(R.id.topAppBar);
@@ -191,6 +214,15 @@ public class MainActivity extends AppCompatActivity {
             updatePhpStatus();
             refreshEnabled();
         }
+        updateServerHint();
+    }
+
+    /** Updates the bottom hint so it points at the active server directory. */
+    private void updateServerHint() {
+        TextView hint = findViewById(R.id.text_server_hint);
+        if (hint == null) return;
+        boolean nukkit = "nukkit".equals(AppSettings.serverType(this));
+        hint.setText(nukkit ? R.string.label_nukkit_to : R.string.label_pocketMine_to);
     }
 
     private void updatePhpStatus() {
@@ -495,6 +527,15 @@ public class MainActivity extends AppCompatActivity {
         } else if (id == R.id.menu_frp) {
             startActivity(new Intent(instance, FrpActivity.class));
             return true;
+        } else if (id == R.id.menu_advanced) {
+            startActivity(new Intent(instance, AdvancedActivity.class));
+            return true;
+        } else if (id == R.id.menu_install_java) {
+            showInstallJavaDialog();
+            return true;
+        } else if (id == R.id.menu_download_nukkit) {
+            downloadNukkit();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -521,6 +562,13 @@ public class MainActivity extends AppCompatActivity {
             default:
                 rgOrientation.check(R.id.rb_orient_auto);
                 break;
+        }
+
+        RadioGroup rgServerType = view.findViewById(R.id.rg_server_type);
+        if ("nukkit".equals(AppSettings.serverType(this))) {
+            rgServerType.check(R.id.rb_type_nukkit);
+        } else {
+            rgServerType.check(R.id.rb_type_pocketmine);
         }
 
         switch (AppSettings.theme(this)) {
@@ -599,11 +647,16 @@ public class MainActivity extends AppCompatActivity {
             if (oid == R.id.rb_orient_portrait) newOrientation = "portrait";
             else if (oid == R.id.rb_orient_landscape) newOrientation = "landscape";
 
+            String newServerType = "pocketmine";
+            int stid = rgServerType.getCheckedRadioButtonId();
+            if (stid == R.id.rb_type_nukkit) newServerType = "nukkit";
+
             SharedPreferences.Editor ed = AppSettings.prefs(this).edit();
             ed.putString(AppSettings.KEY_LANG, newLang);
             ed.putString(AppSettings.KEY_THEME, newTheme);
             ed.putString(AppSettings.KEY_ACCENT, newAccent);
             ed.putString(AppSettings.KEY_ORIENTATION, newOrientation);
+            ed.putString(AppSettings.KEY_SERVER_TYPE, newServerType);
             ed.apply();
 
             boolean newPty = checkPty.isChecked();
@@ -687,6 +740,114 @@ public class MainActivity extends AppCompatActivity {
             }
         }).start();
     }
+
+    /**
+     * Downloads nukkit.jar from the official Nukkit CI into the Nukkit server
+     * directory (/storage/emulated/0/Nukkit). Reuses the app's download helper,
+     * which honours the proxy setting.
+     */
+    private void downloadNukkit() {
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setCancelable(false);
+        dialog.setMessage(getString(R.string.message_downloading, "nukkit.jar"));
+        dialog.setIndeterminate(false);
+        dialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        dialog.show();
+        new Thread(() -> {
+            try {
+                File dir = new File(ServerUtils.dirForType("nukkit"));
+                File saveTo = new File(dir, "nukkit.jar");
+                downloadFile(NUKKIT_JAR_URL, saveTo, dialog);
+                toast(R.string.message_done);
+            } catch (Exception e) {
+                toast(getString(R.string.message_install_fail) + " " + e.getMessage());
+            } finally {
+                runOnUiThread(dialog::dismiss);
+            }
+        }).start();
+    }
+
+    /** Shows the "Install Java" dialog: download from a URL or pick a local file. */
+    private void showInstallJavaDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(R.string.install_java_title);
+        View view = getLayoutInflater().inflate(R.layout.dialog_install_java, null);
+        builder.setView(view);
+        android.widget.TextView hint = view.findViewById(R.id.text_install_java_hint);
+        hint.setText(R.string.install_java_hint);
+        final android.widget.EditText editUrl = view.findViewById(R.id.edit_install_java_url);
+        builder.setPositiveButton(R.string.install_java_download, (d, w) -> {
+            String url = editUrl.getText() == null ? "" : editUrl.getText().toString().trim();
+            if (url.isEmpty()) {
+                toast(R.string.install_java_hint);
+                return;
+            }
+            downloadJava(url);
+        });
+        builder.setNeutralButton(R.string.install_java_choose, (d, w) ->
+                javaLauncher.launch(new String[]{"*/*"}));
+        builder.setNegativeButton(R.string.dialog_cancel, (d, w) -> d.dismiss());
+        builder.show();
+    }
+
+    /** Downloads a java binary / archive and installs it into the app dir. */
+    private void downloadJava(final String url) {
+        final ProgressDialog dialog = new ProgressDialog(this);
+        dialog.setCancelable(false);
+        dialog.setMessage(getString(R.string.install_java_download));
+        dialog.setIndeterminate(true);
+        dialog.show();
+        new Thread(() -> {
+            try {
+                File tmp = new File(ServerUtils.getAppDirectory(), "java_dl.tmp");
+                downloadFile(url, tmp, dialog);
+                installJavaFile(tmp);
+            } catch (Exception e) {
+                toast(getString(R.string.install_java_fail, String.valueOf(e.getMessage())));
+            } finally {
+                runOnUiThread(dialog::dismiss);
+            }
+        }).start();
+    }
+
+    /**
+     * Turns a downloaded file into a runnable "java" in the app dir.
+     *
+     * Archives (.tar.gz/.zip) are scanned for a "java" entry; a plain binary is
+     * copied as-is. The result is chmod'd so Nukkit can exec it.
+     */
+    private void installJavaFile(File src) {
+        File dst = new File(ServerUtils.getAppDirectory(), "java");
+        try {
+            String name = src.getName().toLowerCase();
+            boolean archive = name.endsWith(".zip") || name.endsWith(".tar.gz")
+                    || name.endsWith(".tgz") || name.endsWith(".gz");
+            if (archive) {
+                if (!ServerUtils.extractJava(src, dst)) {
+                    toast(getString(R.string.install_java_fail, "no java in archive"));
+                    return;
+                }
+                src.delete();
+            } else {
+                java.io.FileOutputStream os = new java.io.FileOutputStream(dst);
+                java.io.FileInputStream in = new java.io.FileInputStream(src);
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = in.read(buf)) > 0) os.write(buf, 0, n);
+                in.close();
+                os.close();
+                src.delete();
+            }
+            PhpManager.makeExecutable(dst);
+            toast(R.string.install_java_success);
+        } catch (Exception e) {
+            toast(getString(R.string.install_java_fail, String.valueOf(e.getMessage())));
+        }
+    }
+
+    private static final String NUKKIT_JAR_URL =
+            "https://ci.opencollab.dev/job/NukkitX/job/Nukkit/job/master/"
+                    + "lastSuccessfulBuild/artifact/target/nukkit-1.0-SNAPSHOT.jar";
 
     /**
      * Called by ServerService when the server process actually exits, so the UI

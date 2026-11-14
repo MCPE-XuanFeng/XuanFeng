@@ -85,6 +85,35 @@
     <string name="text_editor_read_error">このファイルを読めません：%s</string>
     <string name="text_editor_info">%1$s · %2$s</string>
 
+    <string name="server_type_pocketmine">PocketMine-MP（PHP）</string>
+    <string name="server_type_nukkit">Nukkit（Java）</string>
+    <string name="title_advanced">詳細設定</string>
+    <string name="advanced_custom_script">カスタム起動スクリプト</string>
+    <string name="advanced_custom_script_hint">有効にすると、このスクリプト（start.sh）が組み込みの起動コマンドを置き換えます。アクティブなサーバーディレクトリから実行されます。</string>
+    <string name="advanced_script_saved">起動スクリプトを保存しました。</string>
+    <string name="advanced_reset_script">既定テンプレートに戻す</string>
+    <string name="advanced_java_path">Java ランタイムのパス（Nukkit）</string>
+    <string name="advanced_java_path_hint">java 実行ファイルのパス。空の場合は自動検出（アプリ内 java、次に PATH）します。</string>
+    <string name="advanced_save">設定を保存</string>
+    <string name="advanced_note">Nukkit には Android 向け Java 8 以上が必要です。メニューの「Java をインストール」か、上のパス設定、またはカスタムスクリプトで指定してください。</string>
+    <string name="install_java_title">Java をインストール</string>
+    <string name="install_java_url">ダウンロード URL</string>
+    <string name="install_java_download">ダウンロードしてインストール</string>
+    <string name="install_java_choose">ローカルファイルを選択</string>
+    <string name="install_java_hint">java 実行ファイル、または java を含む .tar.gz/.zip を指定してください。</string>
+    <string name="install_java_success">Java をインストールしました。</string>
+    <string name="install_java_fail">Java のインストールに失敗：%s</string>
+    <string name="install_java_local_hint">java バイナリ、または java を含むアーカイブ（.tar.gz/.zip）を選択してください。</string>
+    <string name="menu_download_nukkit">Nukkit をダウンロード</string>
+    <string name="menu_advanced">詳細設定</string>
+    <string name="log_using_custom_script">[サーバー] カスタム起動スクリプトを使用: %s</string>
+    <string name="log_custom_script_missing">[サーバー] カスタムスクリプトが有効ですが %s が見つかりません。組み込み起動を使用します。</string>
+    <string name="log_nukkit_missing">[サーバー] エラー: %s に nukkit.jar が見つかりません</string>
+    <string name="log_nukkit_tip">[サーバー] ヒント: nukkit.jar をサーバーディレクトリに入れるか（メニュー＞Nukkit をダウンロード）、詳細設定でカスタムスクリプトを書いてください。</string>
+    <string name="log_java_missing">[サーバー] Java ランタイムが見つかりません。メニュー＞Java をインストール、詳細設定でパス指定、またはカスタムスクリプトを使用してください。</string>
+    <string name="log_java_tip">[サーバー] Nukkit には Android 向け Java 8 以上が必要です（アプリ内 java または PATH の java）。</string>
+    <string name="log_using_java">[サーバー] java を使用: %s</string>
+
     <!-- ファイル管理メニュー -->
     <string name="menu_new_folder">新規フォルダ</string>
     <string name="menu_refresh">更新</string>

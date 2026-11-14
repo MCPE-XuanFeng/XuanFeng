@@ -66,6 +66,11 @@
             android:exported="false"
             android:label="@string/title_text_editor" />
 
+        <activity
+            android:name=".AdvancedActivity"
+            android:exported="false"
+            android:label="@string/title_advanced" />
+
         <service
             android:name=".ServerService"
             android:exported="false"
